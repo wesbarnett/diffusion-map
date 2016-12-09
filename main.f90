@@ -7,6 +7,7 @@ contains
 
     subroutine get_evect(p, evect, evalues)
 
+        ! SLOW
         implicit none
         integer :: n, info, i, lwork, lda, ldvl, ldvr
         real(8), dimension(:), allocatable ::  wr, wi, work
@@ -63,6 +64,20 @@ contains
 
     end subroutine get_evect
 
+    subroutine check_file(myfile)
+
+        implicit none
+        character (len=*), intent(in) :: myfile
+        logical ex
+
+        inquire(file=trim(myfile), exist=ex)
+        if (ex .eqv. .false.) then
+            write(*,"(a)") "ERROR: "//trim(myfile)//" does not exist."
+            stop
+        end if
+
+    end subroutine
+
 end module subs
 
 program main
@@ -75,10 +90,11 @@ program main
     real(8), dimension(:,:), allocatable :: distance, similarity, markov_transition, point, evect
     real(8), dimension(:), allocatable ::  evalue, val
     real(8) :: bandwidth
-    logical :: get_bandwidth, found
+    logical :: get_bandwidth, found, ex
     character (len=256), allocatable :: config_file
-    character (len=32) :: arg
+    character (len=32) :: arg, n_char
     character (len=:), allocatable :: infile, bandwidth_file, evects_file, evalues_file
+    character (len=1024) :: format_string
     type(json_file) :: config
 
     if (command_argument_count() .ne. 1) then
@@ -89,6 +105,7 @@ program main
     call get_command_argument(1, arg)
 
     config_file = trim(arg)
+    call check_file(config_file)
     call config%initialize()
     call config%load_file(filename=config_file)
     call config%print_file()
@@ -121,6 +138,7 @@ program main
     if (.not. found) then 
         infile = "infile.dat"
     end if
+    call check_file(infile)
     call config%get("output.evects",evects_file,found)
     if (.not. found) then 
         evects_file = "evects.dat"
@@ -135,7 +153,7 @@ program main
     ! TODO: assumes data is 3D
 
     ! val is the original data's position on the swiss roll
-    open(newunit=u, file=trim(infile))
+    open(newunit=u, file=trim(infile), status="old")
     read(u,*) n
     allocate(point(n,3))
     allocate(val(n))
@@ -174,8 +192,6 @@ program main
             markov_transition(i,:) = similarity(i,:) / sum(similarity(i,:))
         end do
 
-        ! Perform eigendecomposition
-        ! SLOW!!
         call get_evect(markov_transition, evect, evalue)
 
         open(newunit=u, file=trim(evalues_file))
@@ -183,9 +199,14 @@ program main
         close(u)
 
         open(newunit=u, file=trim(evects_file))
+        write(u,"(a)") "# First column is original location only swiss roll"
+        write(u,"(a)") "# Next columns are eigenvectors"
+        write(u,"(a)") "# In gnuplot to plot the first two non-trivial eigenvectors try:"
+        write(u,"(a)") "#   plot 'evects.dat' u 3:4:1 w points palette"
+        write(n_char,'(i0)') max_output
+        format_string = "("//trim(n_char)//"f12.6)"
         do i = 1, n
-            ! TODO: fix format string
-            write(u,"(5f12.6)") val(i), evect(i,1:max_output)
+            write(u,format_string) val(i), evect(i,1:max_output)
         end do
         close(u)
         
