@@ -24,6 +24,8 @@ set mxtics
 set mytics
 set xtics nomirror out
 set ytics out
+set xlabel "\$\\ln{\\epsilon}\$"
+set ylabel "\$\\ln{\\sum_{ij}A_{ij}}\$"
 fit f(x) 'eps1.dat' using 1:2 via m, b
 unset key
 stats 'eps1.dat' u 1:2 prefix "A"
