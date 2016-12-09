@@ -109,6 +109,7 @@ program main
         bandwidth_file = "eps.dat"
     end if
     call config%get("output.max_cols",max_output,found)
+    ! Default is 4 because we are using 3d data for this example (and first eigenvector is all 1's and is ignored)
     if (.not. found) then 
         max_output = 4
     end if
@@ -132,6 +133,8 @@ program main
 
     ! Get or calculate distances, saved in a distance matrix
     ! TODO: assumes data is 3D
+
+    ! val is the original data's position on the swiss roll
     open(newunit=u, file=trim(infile))
     read(u,*) n
     allocate(point(n,3))
@@ -141,6 +144,7 @@ program main
     end do
     close(u) 
 
+    ! only appropriate for cartesian data. Real world use we would use a different metric here
     allocate(distance(n,n))
     do i = 1, n
         do j = 1, n
@@ -152,6 +156,7 @@ program main
 
     if (get_bandwidth) then
 
+        ! Cycle through different values of the bandwidth. See Fig. S1 in www.pnas.org/cgi/doi/10.1073/pnas.1003293107
         open(newunit=u, file=trim(bandwidth_file))
         do i = logbandwidth_l, logbandwidth_u
             bandwidth = exp(dble(i))
@@ -161,7 +166,7 @@ program main
         close(u)
 
     else
-        ! Calculate similarity matrix
+
         similarity = exp( - ( (distance**2) / (2*bandwidth) ) )
 
         allocate(markov_transition(n,n))
@@ -170,6 +175,7 @@ program main
         end do
 
         ! Perform eigendecomposition
+        ! SLOW!!
         call get_evect(markov_transition, evect, evalue)
 
         open(newunit=u, file=trim(evalues_file))
