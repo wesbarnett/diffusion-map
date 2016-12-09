@@ -199,11 +199,11 @@ program main
         close(u)
 
         open(newunit=u, file=trim(evects_file))
-        write(u,"(a)") "# First column is original location only swiss roll"
+        write(u,"(a)") "# First column is original location on swiss roll"
         write(u,"(a)") "# Next columns are eigenvectors"
         write(u,"(a)") "# In gnuplot to plot the first two non-trivial eigenvectors try:"
         write(u,"(a)") "#   plot 'evects.dat' u 3:4:1 w points palette"
-        write(n_char,'(i0)') max_output
+        write(n_char,'(i0)') max_output+1
         format_string = "("//trim(n_char)//"f12.6)"
         do i = 1, n
             write(u,format_string) val(i), evect(i,1:max_output)
