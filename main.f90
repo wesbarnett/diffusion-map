@@ -1,3 +1,5 @@
+! Diffusion map code example
+! James W. Barnett
 
 module subs
 
@@ -95,7 +97,7 @@ program main
     character (len=:), allocatable :: infile, bandwidth_file, evects_file, evalues_file, diffusionmap_file
     character (len=1024) :: format_string
     type(json_file) :: config
-    real(8) :: time
+    real(8) :: time ! diffusion "time", not simulation time
 
     if (command_argument_count() .ne. 1) then
         write(0,*) "ERROR: First argument should be config file."
@@ -226,6 +228,7 @@ program main
         format_string = "("//trim(n_char)//"f12.6)"
         do i = 1, n
             write(u,"(f12.6)", advance="no") val(i)
+            ! Note that we do not output the first eigenvector since it is trivial (all 1's)
             do j = 2, max_output
                 write(u,"(f12.6)", advance="no") evect(i,j)*evalue(j)**time
             end do
