@@ -46,7 +46,6 @@ contains
             write(*,*) "ERROR: Eigenvector calculation failed."
         end if
 
-
 !       Sort the evalues in descending so we can use the top components for
 !       later calcs
         allocate(order(n))
@@ -164,13 +163,13 @@ program main
 
     ! only appropriate for cartesian data. Real world use we would use a different metric here
     allocate(distance(n,n))
+
+    ! TODO: is symmetric, can speed up
     do i = 1, n
         do j = 1, n
             distance(i,j) = dsqrt( (point(i,1)-point(j,1))**2 + (point(i,2)-point(j,2))**2 + (point(i,3)-point(j,3))**2)
         end do
     end do
-
-    allocate(similarity(n,n))
 
     if (get_bandwidth) then
 
@@ -185,8 +184,12 @@ program main
 
     else
 
+        allocate(similarity(n,n))
+
+        ! Using a Gaussian kernel
         similarity = exp( - ( (distance**2) / (2*bandwidth) ) )
 
+        ! Normalize the diffusion / similarity matrix
         allocate(markov_transition(n,n))
         do i = 1, n
             markov_transition(i,:) = similarity(i,:) / sum(similarity(i,:))
