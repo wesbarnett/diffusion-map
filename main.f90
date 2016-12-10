@@ -92,7 +92,7 @@ program main
     logical :: get_bandwidth, found
     character (len=256), allocatable :: config_file
     character (len=32) :: arg, n_char
-    character (len=:), allocatable :: infile, bandwidth_file, evects_file, evalues_file
+    character (len=:), allocatable :: infile, bandwidth_file, evects_file, evalues_file, diffusionmap_file
     character (len=1024) :: format_string
     type(json_file) :: config
     real(8) :: time
@@ -125,6 +125,10 @@ program main
     if (.not. found) then 
         bandwidth_file = "eps.dat"
     end if
+    call config%get("output.dmap",diffusionmap_file,found)
+    if (.not. found) then 
+        bandwidth_file = "dmap.dat"
+    end if
     call config%get("output.max_cols",max_output,found)
     ! Default is 4 because we are using 3d data for this example (and first eigenvector is all 1's and is ignored)
     if (.not. found) then 
@@ -140,7 +144,7 @@ program main
     end if
     call config%get("time",time,found)
     if (.not. found) then 
-        time = 1.0
+        time = 0.0
     end if
     call check_file(infile)
     call config%get("output.evects",evects_file,found)
@@ -178,7 +182,7 @@ program main
 
     if (get_bandwidth) then
 
-        ! Cycle through different values of the bandwidth. See Fig. S1 in www.pnas.org/cgi/doi/10.1073/pnas.1003293107
+        ! Cycle through different values of the bandwidth. See Fig. S1 in https://www.pnas.org/cgi/doi/10.1073/pnas.1003293107
         open(newunit=u, file=trim(bandwidth_file))
         do i = logbandwidth_l, logbandwidth_u
             bandwidth = exp(dble(i))
@@ -203,19 +207,26 @@ program main
         call get_evect(markov_transition, evect, evalue)
 
         open(newunit=u, file=trim(evalues_file))
-        write(u,"(f12.6)") evalue(1:max_output)**time
+        write(u,"(f12.6)") evalue(1:max_output)
         close(u)
 
         open(newunit=u, file=trim(evects_file))
+        write(n_char,'(i0)') max_output
+        format_string = "("//trim(n_char)//"f12.6)"
+        write(u,format_string) evect
+        close(u)
+
+        open(newunit=u, file=trim(diffusionmap_file))
         write(u,"(a)") "# First column is original location on swiss roll"
-        write(u,"(a)") "# Next columns are eigenvectors"
-        write(u,"(a)") "# In gnuplot to plot the first two non-trivial eigenvectors try:"
-        write(u,"(a)") "#   plot 'evects.dat' u 3:4:1 w points palette"
-        write(n_char,'(i0)') max_output+1
+        write(u,"(a)") "# Next columns are points in diffusion space"
+        write(u,"(a)") "# In gnuplot to plot the first dimensions try:"
+        write(u,"(a)") "#   plot 'evects.dat' u 2:3:1 w points palette"
+        write(u,"(a,f12.6)") "# time = ", time
+        write(u,"(a,f12.6)") "# bandwidth = ", bandwidth
         format_string = "("//trim(n_char)//"f12.6)"
         do i = 1, n
             write(u,"(f12.6)", advance="no") val(i)
-            do j = 1, max_output
+            do j = 2, max_output
                 write(u,"(f12.6)", advance="no") evect(i,j)*evalue(j)**time
             end do
             write(u,*)
