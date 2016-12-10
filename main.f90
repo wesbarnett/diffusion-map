@@ -89,7 +89,7 @@ program main
     real(8), dimension(:,:), allocatable :: distance, similarity, markov_transition, point, evect
     real(8), dimension(:), allocatable ::  evalue, val
     real(8) :: bandwidth
-    logical :: get_bandwidth, found, ex
+    logical :: get_bandwidth, found
     character (len=256), allocatable :: config_file
     character (len=32) :: arg, n_char
     character (len=:), allocatable :: infile, bandwidth_file, evects_file, evalues_file
