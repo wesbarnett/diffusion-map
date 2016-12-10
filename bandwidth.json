@@ -2,8 +2,8 @@
     "infile": "swissroll.dat",
     "bandwidth_calc": {
         "get": true,
-        "log_l": -10,
-        "log_u": 10,
+        "log_l": -20,
+        "log_u": 20,
         "file": "eps.dat"
     },
 }

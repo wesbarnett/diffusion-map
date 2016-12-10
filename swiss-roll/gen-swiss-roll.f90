@@ -32,7 +32,7 @@ program main
     implicit none
     integer :: i, n, u
     real(8), allocatable :: data2d(:,:), data3d(:,:)
-	real(8) :: rand(2), width, height, hole_x1, hole_x2, hole_y1, hole_y2, x, y, rotate(3,3), a, b, g
+	real(8) :: rand(2), width, height, hole_x1, hole_x2, hole_y1, hole_y2, x, y, rotate(3,3), a, b, g, r
     real(8) :: Rx(3,3), Ry(3,3), Rz(3,3), angles(3), mindim
 
     call random_number(angles)
@@ -50,47 +50,35 @@ program main
 	call init_seed()
 
     n = 1000
-    width = 10.0
-    height = 10.0
-    hole_x1 = 0.00
-    hole_x2 = 0.00
-    hole_y1 = 0.00
-    hole_y2 = 0.00
+    height = 20.0
 
     ! Generate a plane of numbers randomly
     allocate(data2d(2,n))
-    do i = 1, n
-		call random_number(rand)
-        x = rand(1)*width
-        y = rand(2)*height
-        do while ((x .gt. hole_x1) .and. (x .lt. hole_x2) .and. (y .gt. hole_y1) .and. (y .lt. hole_y2))
-            call random_number(rand)
-            x = rand(1)*width
-            y = rand(2)*height
-        end do
-		data2d(1,i) = x
-		data2d(2,i) = y
-    end do
-
-    ! Transform to a swiss roll
     allocate(data3d(3,n))
     do i = 1, n
-		data3d(:,i) = [ data2d(1,i)*cos(data2d(1,i)), data2d(2,i), data2d(1,i)*sin(data2d(1,i)) ]
+		call random_number(rand)
+        !r = dble(i)-1.0d0
+        !x = pi*(1.5d0+3.0d0*r)
+        x = rand(1)*height
+        y = rand(2)*height
+		data2d(1,i) = x
+		data2d(2,i) = y
+		data3d(:,i) = [ x*dcos(x), x*dsin(x), y ]
     end do
 
     ! Add some noise
-!   mindim = min(maxval(data3d(2,:)) - minval(data3d(2,:)), maxval(data3d(1,:)) - minval(data3d(1,:)))
-!   do i = 1, n
-!       call random_number(rand)
-!       data3d(1:2,i) = data3d(1:2,i) + 0.02*rand*n*sqrt(mindim)
-!   end do
+    mindim = min(maxval(data3d(2,:)) - minval(data3d(2,:)), maxval(data3d(1,:)) - minval(data3d(1,:)))
+    do i = 1, n
+        call random_number(rand)
+        data3d(1:2,i) = data3d(1:2,i) + 0.02*rand*sqrt(mindim)
+    end do
 
     data3d = matmul(rotate, data3d)
 
 	open(newunit=u, file="swissroll.dat")
     write(U, "(i0)") n
     do i = 1, n
-        write(U, "(4f12.6)") data3d(:,i), data2d(1,i)
+        write(U, "(4f24.3)") data3d(:,i), data2d(1,i)
     end do
 	close(U)
 
