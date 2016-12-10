@@ -27,43 +27,37 @@ end module subs
 
 program main
 
-	use subs
+    use subs
 
     implicit none
     integer :: i, n, u
     real(8), allocatable :: data2d(:,:), data3d(:,:)
-	real(8) :: rand(2), width, height, hole_x1, hole_x2, hole_y1, hole_y2, x, y, rotate(3,3), a, b, g, r
+    real(8) :: rand(2), width, height, hole_x1, hole_x2, hole_y1, hole_y2, x, y, rotate(3,3), a, b, g, r
     real(8) :: Rx(3,3), Ry(3,3), Rz(3,3), angles(3), mindim
+    logical :: do_rotate
+    character (len=:), allocatable :: outfile
 
-    call random_number(angles)
-
-    a = angles(1) * pi
-    b = angles(2) * pi
-    g = angles(3) * pi
-
-    Rx = reshape((/ 1.0d0,  0.0d0,   0.0d0,  0.0d0, cos(a), -sin(a),   0.0d0, sin(a), cos(a) /), shape(Rx))
-    Ry = reshape((/cos(b),  0.0d0,  sin(b),  0.0d0,  1.0d0,   0.0d0, -sin(b),  0.0d0, cos(b) /), shape(Ry))
-    Rz = reshape((/cos(g), -sin(g),  0.0d0, sin(g), cos(g),   0.0d0,   0.0d0,  0.0d0,  1.0d0 /), shape(Rz))
-
-    rotate = matmul(Rz,  matmul(Ry, Rx))
-
-	call init_seed()
-
+    ! TODO: Read in from config file
+    do_rotate = .true.
+    outfile = "swissroll.dat"
     n = 1000
     height = 20.0
+
+    call init_seed()
 
     ! Generate a plane of numbers randomly
     allocate(data2d(2,n))
     allocate(data3d(3,n))
     do i = 1, n
-		call random_number(rand)
+        call random_number(rand)
+        ! TODO
         !r = dble(i)-1.0d0
         !x = pi*(1.5d0+3.0d0*r)
         x = rand(1)*height
         y = rand(2)*height
-		data2d(1,i) = x
-		data2d(2,i) = y
-		data3d(:,i) = [ x*dcos(x), x*dsin(x), y ]
+        data2d(1,i) = x
+        data2d(2,i) = y
+        data3d(:,i) = [ x*dcos(x), x*dsin(x), y ]
     end do
 
     ! Add some noise
@@ -73,13 +67,27 @@ program main
         data3d(1:2,i) = data3d(1:2,i) + 0.02*rand*sqrt(mindim)
     end do
 
-    data3d = matmul(rotate, data3d)
+    ! Rotate all the points 
+    if (do_rotate) then
+        call random_number(angles)
 
-	open(newunit=u, file="swissroll.dat")
-    write(U, "(i0)") n
+        a = angles(1) * pi
+        b = angles(2) * pi
+        g = angles(3) * pi
+
+        Rx = reshape((/ 1.0d0,  0.0d0,   0.0d0,  0.0d0, cos(a), -sin(a),   0.0d0, sin(a), cos(a) /), shape(Rx))
+        Ry = reshape((/cos(b),  0.0d0,  sin(b),  0.0d0,  1.0d0,   0.0d0, -sin(b),  0.0d0, cos(b) /), shape(Ry))
+        Rz = reshape((/cos(g), -sin(g),  0.0d0, sin(g), cos(g),   0.0d0,   0.0d0,  0.0d0,  1.0d0 /), shape(Rz))
+
+        rotate = matmul(Rz,  matmul(Ry, Rx))
+        data3d = matmul(rotate, data3d)
+    end if
+
+    open(newunit=u, file=trim(outfile))
+    write(u, "(i0)") n
     do i = 1, n
         write(U, "(4f24.3)") data3d(:,i), data2d(1,i)
     end do
-	close(U)
+    close(U)
 
 end program main
