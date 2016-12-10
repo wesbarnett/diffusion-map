@@ -95,6 +95,7 @@ program main
     character (len=:), allocatable :: infile, bandwidth_file, evects_file, evalues_file
     character (len=1024) :: format_string
     type(json_file) :: config
+    real(8) :: time
 
     if (command_argument_count() .ne. 1) then
         write(0,*) "ERROR: First argument should be config file."
@@ -136,6 +137,10 @@ program main
     call config%get("infile",infile,found)
     if (.not. found) then 
         infile = "infile.dat"
+    end if
+    call config%get("time",time,found)
+    if (.not. found) then 
+        time = 1.0
     end if
     call check_file(infile)
     call config%get("output.evects",evects_file,found)
@@ -198,7 +203,7 @@ program main
         call get_evect(markov_transition, evect, evalue)
 
         open(newunit=u, file=trim(evalues_file))
-        write(u,"(f12.6)") evalue(1:max_output)
+        write(u,"(f12.6)") evalue(1:max_output)**time
         close(u)
 
         open(newunit=u, file=trim(evects_file))
@@ -209,7 +214,11 @@ program main
         write(n_char,'(i0)') max_output+1
         format_string = "("//trim(n_char)//"f12.6)"
         do i = 1, n
-            write(u,format_string) val(i), evect(i,1:max_output)
+            write(u,"(f12.6)", advance="no") val(i)
+            do j = 1, max_output
+                write(u,"(f12.6)", advance="no") evect(i,j)*evalue(j)**time
+            end do
+            write(u,*)
         end do
         close(u)
         
