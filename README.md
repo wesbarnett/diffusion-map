@@ -1,7 +1,6 @@
-Personal code for diffusion map examples. Only suitable for 3-dimensional data
-at this point, so its really just useful for toy data sets. However, it
-wouldn't take much to modify the source for use with whatever data set or
-distance metric you desire.
+Personal code for diffusion map examples. Specifically made to test the idea on
+some well-known data sets, but  it wouldn't take much to modify the source for
+use with whatever data set or distance metric you desire.
 
 ## Examples
 
