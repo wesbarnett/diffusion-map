@@ -5,6 +5,13 @@ module subs
 
     implicit none
 
+    type, public :: diffusion_map
+        real(8), dimension(:,:), allocatable :: evec, map
+        real(8), dimension(:), allocatable :: eval
+    contains
+        procedure :: run => diffusion_map_run
+    end type
+
 contains 
 
     subroutine get_evect(p, evect, evalues)
@@ -105,6 +112,31 @@ contains
 
     end function get_distance
 
+    subroutine diffusion_map_run(this, distance, bandwidth, time)
+
+        integer :: i, n
+        real(8), dimension(:,:), allocatable :: similarity, markov_transition
+        real(8), dimension(:,:), allocatable, intent(in) :: distance
+        real(8), intent(in) :: time, bandwidth
+        class(diffusion_map), intent(inout) :: this
+
+        n = size(distance,1)
+
+        allocate(similarity(n,n))
+
+        ! Using a Gaussian kernel
+        similarity = exp( - ( (distance**2) / (2*bandwidth) ) )
+
+        ! Normalize the diffusion / similarity matrix
+        allocate(markov_transition(n,n))
+        do i = 1, n
+            markov_transition(i,:) = similarity(i,:) / sum(similarity(i,:))
+        end do
+
+        call get_evect(markov_transition, this%evec, this%eval)
+
+    end subroutine diffusion_map_run
+
 end module subs
 
 program main
@@ -124,6 +156,7 @@ program main
     character (len=1024) :: format_string
     type(json_file) :: config
     real(8) :: time ! diffusion "time", not simulation time
+    type(diffusion_map) :: dm
 
     if (command_argument_count() .ne. 1) then
         write(0,*) "ERROR: First argument should be config file."
@@ -211,27 +244,16 @@ program main
 
     else
 
-        allocate(similarity(n,n))
-
-        ! Using a Gaussian kernel
-        similarity = exp( - ( (distance**2) / (2*bandwidth) ) )
-
-        ! Normalize the diffusion / similarity matrix
-        allocate(markov_transition(n,n))
-        do i = 1, n
-            markov_transition(i,:) = similarity(i,:) / sum(similarity(i,:))
-        end do
-
-        call get_evect(markov_transition, evect, evalue)
+        call dm%run(distance, bandwidth, time)
 
         open(newunit=u, file=trim(evalues_file))
-        write(u,"(f12.6)") evalue(1:max_output)
+        write(u,"(f12.6)") dm%eval(1:max_output)
         close(u)
 
         open(newunit=u, file=trim(evects_file))
         write(n_char,'(i0)') max_output
         format_string = "("//trim(n_char)//"f12.6)"
-        write(u,format_string) transpose(evect(:,1:max_output))
+        write(u,format_string) transpose(dm%evec(:,1:max_output))
         close(u)
 
         open(newunit=u, file=trim(diffusionmap_file))
@@ -246,7 +268,7 @@ program main
             write(u,"(f12.6)", advance="no") val(i)
             ! Note that we do not output the first eigenvector since it is trivial (all 1's)
             do j = 2, max_output
-                write(u,"(f12.6)", advance="no") evect(i,j)*evalue(j)**time
+                write(u,"(f12.6)", advance="no") dm%evec(i,j)*dm%eval(j)**time
             end do
             write(u,*)
         end do
