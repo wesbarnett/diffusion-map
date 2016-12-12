@@ -1,8 +1,0 @@
-{
-    "infile": "swissroll.dat",
-    "output": {
-        "evalues": "evalues.dat",
-        "evects": "evects.dat"
-    },
-    "bandwidth": 1.65,
-}

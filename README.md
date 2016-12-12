@@ -1,4 +1,8 @@
-Personal code for diffusion map example. WIP
+Personal code for diffusion map example.
 
-![Swiss roll dataset](example/swissroll.png)
-![First two eigenvectors from diffusion map](example/evects.png)
+## Swiss roll
+
+![Swiss roll dataset](swiss-roll-example/swissroll.png)
+![Diffusion map (eps = 1)](swiss-roll-example/dmap-1.png)
+![Diffusion map (eps = 10)](swiss-roll-example/dmap-10.png)
+![Diffusion map (eps = 100)](swiss-roll-example/dmap-100.png)

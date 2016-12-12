@@ -1,10 +1,10 @@
 {
     "infile": "swissroll.dat",
     "output": {
-        "evalues": "evalues.dat",
-        "evects": "evects.dat",
-        "dmap": "dmap.dat"
+        "evalues": "evalues-1.dat",
+        "evects": "evects-1.dat",
+        "dmap": "dmap-1.dat"
     },
-    "bandwidth": 1000.0,
+    "bandwidth": 1.0,
     "time": 0.0
 }

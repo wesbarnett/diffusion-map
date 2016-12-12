@@ -40,8 +40,8 @@ program main
     ! TODO: Read in from config file
     do_rotate = .true.
     outfile = "swissroll.dat"
-    n = 1000
-    height = 20.0
+    n = 2000
+    height = 10.0
 
     call init_seed()
 

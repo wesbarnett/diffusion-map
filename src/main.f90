@@ -129,7 +129,7 @@ program main
     end if
     call config%get("output.dmap",diffusionmap_file,found)
     if (.not. found) then 
-        bandwidth_file = "dmap.dat"
+        diffusionmap_file = "dmap.dat"
     end if
     call config%get("output.max_cols",max_output,found)
     ! Default is 4 because we are using 3d data for this example (and first eigenvector is all 1's and is ignored)
@@ -215,7 +215,7 @@ program main
         open(newunit=u, file=trim(evects_file))
         write(n_char,'(i0)') max_output
         format_string = "("//trim(n_char)//"f12.6)"
-        write(u,format_string) evect
+        write(u,format_string) transpose(evect(:,1:max_output))
         close(u)
 
         open(newunit=u, file=trim(diffusionmap_file))
