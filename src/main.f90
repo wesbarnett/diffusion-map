@@ -79,6 +79,32 @@ contains
 
     end subroutine
 
+    subroutine get_distance(d, a)
+
+        implicit none
+        real(8), allocatable, intent(inout) :: d(:,:)
+        real(8), allocatable, intent(in) :: a(:,:)
+        real(8) :: s
+        integer :: n, i, j, k
+    
+        n = size(a,1)
+
+        ! only appropriate for cartesian data. Real world use we would use a different metric here
+        allocate(d(n,n))
+
+        ! TODO: is symmetric, can speed up
+        do i = 1, n
+            do j = 1, n
+                s = 0.0d0
+                do k = 1, size(a,2)
+                    s = s + (a(i,k)-a(j,k))**2
+                end do
+                d(i,j) = dsqrt(s)
+            end do
+        end do
+
+    end subroutine get_distance
+
 end module subs
 
 program main
@@ -170,15 +196,7 @@ program main
     end do
     close(u) 
 
-    ! only appropriate for cartesian data. Real world use we would use a different metric here
-    allocate(distance(n,n))
-
-    ! TODO: is symmetric, can speed up
-    do i = 1, n
-        do j = 1, n
-            distance(i,j) = dsqrt( (point(i,1)-point(j,1))**2 + (point(i,2)-point(j,2))**2 + (point(i,3)-point(j,3))**2)
-        end do
-    end do
+    call get_distance(distance, point)
 
     if (get_bandwidth) then
 
