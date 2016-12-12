@@ -92,14 +92,14 @@ contains
         ! only appropriate for cartesian data. Real world use we would use a different metric here
         allocate(get_distance(n,n))
 
-        ! TODO: is symmetric, can speed up
-        do i = 1, n
-            do j = 1, n
+        do i = 1, n-1
+            do j = i+1, n
                 s = 0.0d0
                 do k = 1, size(indata,2)
                     s = s + (indata(i,k)-indata(j,k))**2
                 end do
                 get_distance(i,j) = dsqrt(s)
+                get_distance(j,i) = get_distance(i,j)
             end do
         end do
 
