@@ -79,31 +79,31 @@ contains
 
     end subroutine
 
-    subroutine get_distance(d, a)
+    function get_distance(indata)
 
         implicit none
-        real(8), allocatable, intent(inout) :: d(:,:)
-        real(8), allocatable, intent(in) :: a(:,:)
+        real(8), allocatable :: get_distance(:,:)
+        real(8), allocatable, intent(in) :: indata(:,:)
         real(8) :: s
         integer :: n, i, j, k
     
-        n = size(a,1)
+        n = size(indata,1)
 
         ! only appropriate for cartesian data. Real world use we would use a different metric here
-        allocate(d(n,n))
+        allocate(get_distance(n,n))
 
         ! TODO: is symmetric, can speed up
         do i = 1, n
             do j = 1, n
                 s = 0.0d0
-                do k = 1, size(a,2)
-                    s = s + (a(i,k)-a(j,k))**2
+                do k = 1, size(indata,2)
+                    s = s + (indata(i,k)-indata(j,k))**2
                 end do
-                d(i,j) = dsqrt(s)
+                get_distance(i,j) = dsqrt(s)
             end do
         end do
 
-    end subroutine get_distance
+    end function get_distance
 
 end module subs
 
@@ -196,7 +196,7 @@ program main
     end do
     close(u) 
 
-    call get_distance(distance, point)
+    distance = get_distance(point)
 
     if (get_bandwidth) then
 
