@@ -1,5 +1,8 @@
 {
-    "infile": "swissroll.dat",
+    "input": {
+        "file": "swissroll.dat",
+        "dimensions": 3
+    },
     "bandwidth_calc": {
         "get": true,
         "log_l": -20,

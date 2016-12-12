@@ -87,7 +87,7 @@ program main
     use subs
 
     implicit none
-    integer :: i, j, n, u, logbandwidth_l, logbandwidth_u, max_output
+    integer :: i, j, n, u, logbandwidth_l, logbandwidth_u, max_output, dimensions
     real(8), dimension(:,:), allocatable :: distance, similarity, markov_transition, point, evect
     real(8), dimension(:), allocatable ::  evalue, val
     real(8) :: bandwidth
@@ -131,16 +131,17 @@ program main
     if (.not. found) then 
         diffusionmap_file = "dmap.dat"
     end if
-    call config%get("output.max_cols",max_output,found)
-    ! Default is 4 because we are using 3d data for this example (and first eigenvector is all 1's and is ignored)
-    if (.not. found) then 
-        max_output = 4
-    end if
     call config%get("bandwidth",bandwidth,found)
     if (.not. found) then 
         bandwidth = 1.0
     end if
-    call config%get("infile",infile,found)
+    call config%get("input.dimensions",dimensions,found)
+    if (.not. found) then 
+        dimensions = 3
+    end if
+    ! Default is 4 because we are using 3d data for this example (and first eigenvector is all 1's and is ignored)
+    max_output = dimensions + 1
+    call config%get("input.file",infile,found)
     if (.not. found) then 
         infile = "infile.dat"
     end if
@@ -159,13 +160,10 @@ program main
     end if
     call config%destroy()
 
-    ! Get or calculate distances, saved in a distance matrix
-    ! TODO: assumes data is 3D
-
     ! val is the original data's position on the swiss roll
     open(newunit=u, file=trim(infile), status="old")
     read(u,*) n
-    allocate(point(n,3))
+    allocate(point(n,dimensions))
     allocate(val(n))
     do i = 1, n
         read(u,*) point(i,:), val(i)
