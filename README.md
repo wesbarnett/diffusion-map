@@ -2,7 +2,14 @@ Personal code for diffusion map example.
 
 ## Swiss roll
 
-![Swiss roll dataset](swiss-roll-example/swissroll.png)
-![Diffusion map (eps = 1)](swiss-roll-example/dmap-1.png)
-![Diffusion map (eps = 10)](swiss-roll-example/dmap-10.png)
-![Diffusion map (eps = 100)](swiss-roll-example/dmap-100.png)
+![Swiss roll dataset](examples/swiss-roll/swissroll.png)
+![Diffusion map (eps = 1)](examples/swiss-roll/dmap-1.png)
+![Diffusion map (eps = 10)](examples/swiss-roll/dmap-10.png)
+![Diffusion map (eps = 100)](examples/swiss-roll/dmap-100.png)
+
+## Punctured sphere
+
+![Punctured sphere dataset](examples/punctured-sphere/puncsphere.png)
+![Diffusion map (eps = 1)](examples/punctured-sphere/dmap-1.png)
+![Diffusion map (eps = 10)](examples/punctured-sphere/dmap-10.png)
+![Diffusion map (eps = 100)](examples/punctured-sphere/dmap-100.png)
