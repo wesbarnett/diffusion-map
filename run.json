@@ -1,10 +1,10 @@
 {
-    "infile": "swissroll.dat",
+    "infile": "puncsphere.dat",
     "output": {
-        "evalues": "evalues-1.dat",
-        "evects": "evects-1.dat",
-        "dmap": "dmap-1.dat"
+        "evalues": "evalues-100.dat",
+        "evects": "evects-100.dat",
+        "dmap": "dmap-100.dat"
     },
-    "bandwidth": 1.0,
+    "bandwidth": 100.0,
     "time": 0.0
 }
