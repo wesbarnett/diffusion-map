@@ -7,7 +7,7 @@ distance metric you desire.
 
 Compare the following results with those found [in this
 paper](http://wireilla.com/papers/ijfcst/V4N6/4614ijfcst06.pdf), specifically in
-Section 3.1. Note that my value of `bandwidth` is what the square of what they
+Section 3.1. Note that my value of `bandwidth` is the square of what they
 call `sigma` (I am not squaring the denominator of the Gaussian kernel in my
 code).
 
