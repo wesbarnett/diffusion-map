@@ -1,12 +1,11 @@
 
-CFLAGS := -Wall
-LDFLAGS := -llapack -lblas -ljsonfortran
-
 run: 
 	@mkdir -p include
-	@gfortran src/main.f90 -o run ${CFLAGS} ${LDFLAGS} -I/usr/include -Jinclude
+	@gfortran -c -o src/diffusion_map.o src/diffusion_map.f90 -Jinclude -Wall -llapack -lblas
+	@gfortran src/main.f90 src/*.o -o run -ljsonfortran -I/usr/include -Jinclude -llapack -lblas
 
 clean:
 	@rm include/*.mod
+	@rm src/*.o
 	@rmdir include
 	@rm run
