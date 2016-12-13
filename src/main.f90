@@ -238,7 +238,7 @@ program main
         do j = 1, n
             write(u,"(f12.6)", advance="no") val(j)
             do i = 1, dimensions
-                write(u,"(f12.6)", advance="no") pca%data(i,j)
+                write(u,"(f12.6)", advance="no") pca%x(i,j)
             end do
             write(u,*)
         end do

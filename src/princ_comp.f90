@@ -2,7 +2,7 @@ module princ_comp
 
     implicit none
     type, public :: princ_comp_type
-        real(8), allocatable :: cov(:,:), contrib(:), cumul_contrib(:), evec(:,:), eval(:), data(:,:)
+        real(8), allocatable :: cov(:,:), contrib(:), cumul_contrib(:), evec(:,:), eval(:), x(:,:)
     contains
         procedure :: run => princ_comp_run
     end type
@@ -97,7 +97,7 @@ contains
             this%cumul_contrib(i) = sum(this%contrib(1:i))
         end do
 
-        this%data = matmul(transpose(this%evec), indata)
+        this%x = matmul(transpose(this%evec), indata)
 
     end subroutine princ_comp_run
 
