@@ -45,6 +45,8 @@ code).
 
 ### Cluster of points
 
+Colors indicate where points are in relationship to axis with greatest variance.
+
 #### Original data
 ![Cluster dataset](examples/cluster/cluster.png)
 
@@ -58,6 +60,9 @@ code).
 
 ### Swiss roll
 
+Colors indicate where points are in relationship to the center of the swiss
+roll.
+
 #### Original data
 ![Swiss roll dataset](examples/swiss-roll/swissroll.png)
 
@@ -70,6 +75,9 @@ code).
 ![Diffusion map (eps = 100)](examples/swiss-roll/dmap-100.png)
 
 ### Punctured sphere
+
+Colors indicate where points are in relationship to axis that goes through the
+holes in the sphere.
 
 #### Original data
 ![Punctured sphere dataset](examples/punctured-sphere/puncsphere.png)
