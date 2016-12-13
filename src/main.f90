@@ -248,7 +248,7 @@ program main
 
         write(*,*) "Writing PCA data to "//trim(pca_file)//"..."
         open(newunit=u, file=trim(pca_file))
-        ! NOTE: dimensions for pca data are swapped
+        ! NOTE: dimensions for pca data are reversed from those of the diffusion map
         do j = 1, n
             write(u,"(f12.6)", advance="no") val(j)
             do i = 1, dimensions
