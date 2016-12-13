@@ -1,0 +1,10 @@
+{
+    "infile": "swissroll.dat",
+    "dimensions": 3,
+    "pca": {
+        "run": true,
+        "evalues": "pca-evalues.dat",
+        "evects": "pca-evects.dat",
+        "outfile": "pca.dat"
+    },
+}

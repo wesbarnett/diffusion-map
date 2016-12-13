@@ -8,11 +8,5 @@
         "outfile": "dmap.dat",
         "bandwidth": 1.0,
         "time": 0.0
-    },
-    "pca": {
-        "run": true,
-        "evalues": "pca-evalues.dat",
-        "evects": "pca-evects.dat",
-        "outfile": "pca.dat"
-    },
+    }
 }
