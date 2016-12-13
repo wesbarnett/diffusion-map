@@ -68,7 +68,7 @@ Colors indicate original cluster.
 ![Cluster dataset](examples/clusters/clusters.png)
 
 #### Principal component analysis
-![PCA](examples/cluster/pca.png)
+![PCA](examples/clusters/pca.png)
 
 #### Diffusion maps
 ![Diffusion map (eps = 1)](examples/clusters/dmap-1.png)
