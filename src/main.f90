@@ -141,15 +141,15 @@ program main
     end if
     call config%get("pca.evects",pca_evects_file,found)
     if (.not. found) then 
-        evects_file = "evects.dat"
+        pca_evects_file = "evects.dat"
     end if
     call config%get("pca.evalues",pca_evalues_file,found)
     if (.not. found) then 
-        evalues_file = "evalues.dat"
+        pca_evalues_file = "evalues.dat"
     end if
     call config%get("pca.outfile",pca_file,found)
     if (.not. found) then 
-        evalues_file = "pca.dat"
+        pca_file = "pca.dat"
     end if
     call config%destroy()
 
