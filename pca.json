@@ -1,5 +1,5 @@
 {
-    "infile": "swissroll.dat",
+    "infile": "puncsphere.dat",
     "dimensions": 3,
     "pca": {
         "run": true,
