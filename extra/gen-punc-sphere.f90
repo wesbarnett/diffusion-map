@@ -62,16 +62,19 @@ program main
     outfile = "puncsphere.dat"
     n = 2000
     center = [ 0.0, 0.0, 0.0 ]
-    r = 1.0
+    r = 0.5
 
     call init_seed()
 
     allocate(data3d(3,n))
     allocate(z(n))
     do i = 1, n
-        point = gen_sphere_point(center, r) 
-        do while (point(3) .gt. 0.75*r .or. point(3) .lt. -0.75*r)
+        do while (.true.)
             point = gen_sphere_point(center, r) 
+            call random_number(rand)
+            if ((rand(1)-0.5d0) .le. point(3) .and. point(3) .lt. (center(3)+0.75*r)) then 
+                exit
+            end if
         end do
         data3d(:,i) = point
         z(i) = point(3)
