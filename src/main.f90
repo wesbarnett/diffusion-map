@@ -142,6 +142,8 @@ contains
         allocate(this%evec(size(evec,1),1:dimensions+1))
         this%evec = evec(:,1:dimensions+1)
 
+        ! Note that we do not save the first eigenvector to the map since it is trivial (all 1's)
+        ! We do keep it in "evect" just as a check
         allocate(this%map(n,dimensions))
         do j = 2, dimensions+1
             this%map(:,j-1) = this%evec(:,j)*this%eval(j)**time
@@ -271,6 +273,7 @@ program main
         open(newunit=u, file=trim(diffusionmap_file))
         write(u,"(a)") "# First column is original location on swiss roll"
         write(u,"(a)") "# Next columns are points in diffusion space"
+        write(u,"(a)") "# Note that first (trivial) eigenvector not used."
         write(u,"(a)") "# In gnuplot to plot the first dimensions try:"
         write(u,"(a)") "#   plot 'evects.dat' u 2:3:1 w points palette"
         write(u,"(a,f12.6)") "# time = ", time
@@ -278,7 +281,6 @@ program main
         format_string = "("//trim(n_char)//"f12.6)"
         do i = 1, n
             write(u,"(f12.6)", advance="no") val(i)
-            ! Note that we do not output the first eigenvector since it is trivial (all 1's)
             do j = 1, dimensions
                 write(u,"(f12.6)", advance="no") dm%map(i,j)
             end do
