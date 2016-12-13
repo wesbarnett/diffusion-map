@@ -1,6 +1,7 @@
-Personal code for diffusion map examples. Specifically made to test the idea on
-some well-known data sets, but  it wouldn't take much to modify the source for
-use with whatever data set or distance metric you desire.
+Personal code for principal components analysis and diffusion map examples.
+Specifically made to test the idea on some well-known data sets, but it
+wouldn't take much to modify the source for use with whatever data set or
+distance metric you desire.
 
 ## Examples
 
