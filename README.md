@@ -42,7 +42,7 @@ code).
 ![Punctured sphere dataset](examples/punctured-sphere/puncsphere.png)
 
 #### Principal components analysis
-![PCA](examples/punctered-sphere/pca.png)
+![PCA](examples/punctured-sphere/pca.png)
 
 #### Diffusion maps
 ![Diffusion map (eps = 1)](examples/punctured-sphere/dmap-1.png)
