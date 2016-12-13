@@ -112,8 +112,21 @@ contains
 
     end function get_distance
 
+    function gauss_similarity(distance, bandwidth)
+
+        implicit none
+        real(8) :: bandwidth
+        real(8), dimension(:,:), allocatable, intent(in) :: distance
+        real(8), dimension(:,:), allocatable :: gauss_similarity
+
+        allocate(gauss_similarity(size(distance,1),size(distance,2)))
+        gauss_similarity = exp( - ( (distance**2) / (2*bandwidth) ) )
+
+    end function gauss_similarity
+
     subroutine diffusion_map_run(this, distance, bandwidth, time, dimensions)
 
+        implicit none
         integer :: i, j, n
         integer, intent(in), optional :: dimensions
         real(8), dimension(:,:), allocatable :: similarity, markov_transition, evec
@@ -124,10 +137,8 @@ contains
 
         n = size(distance,1)
 
-        allocate(similarity(n,n))
-
         ! Using a Gaussian kernel
-        similarity = exp( - ( (distance**2) / (2*bandwidth) ) )
+        similarity = gauss_similarity(distance, bandwidth)
 
         ! Normalize the diffusion / similarity matrix
         allocate(markov_transition(n,n))
@@ -251,7 +262,7 @@ program main
         open(newunit=u, file=trim(bandwidth_file))
         do i = logbandwidth_l, logbandwidth_u
             bandwidth = exp(dble(i))
-            similarity = exp( - ( (distance**2) / (2*bandwidth) ) )
+            similarity = gauss_similarity(distance, bandwidth)
             write(u,"(i0,f12.6)") i, log(sum(similarity))
         end do
         close(u)
@@ -275,7 +286,7 @@ program main
         write(u,"(a)") "# Next columns are points in diffusion space"
         write(u,"(a)") "# Note that first (trivial) eigenvector not used."
         write(u,"(a)") "# In gnuplot to plot the first dimensions try:"
-        write(u,"(a)") "#   plot 'evects.dat' u 2:3:1 w points palette"
+        write(u,"(a)") "#   plot 'dmap.dat' u 2:3:1 w points palette"
         write(u,"(a,f12.6)") "# time = ", time
         write(u,"(a,f12.6)") "# bandwidth = ", bandwidth
         format_string = "("//trim(n_char)//"f12.6)"
