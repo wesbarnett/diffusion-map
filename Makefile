@@ -16,6 +16,7 @@ machlearn.so: ${OBJECTS}
 	@gfortran -c -o src/$@ $< -Jinclude -Wall -llapack -lblas -shared -fPIC
 
 clean:
+	@rm *.mod
 	@rm include/*.mod
 	@rmdir include
 	@rm src/*.o
