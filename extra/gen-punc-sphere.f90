@@ -66,6 +66,8 @@ program main
 
     call init_seed()
 
+    ! top of sphere is cut off
+    ! points become less dense as they go further down the sphere
     allocate(data3d(3,n))
     allocate(z(n))
     do i = 1, n
