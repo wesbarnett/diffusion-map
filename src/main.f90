@@ -80,6 +80,7 @@ program main
     call get_command_argument(1, arg)
 
     config_file = trim(arg)
+    write(*,*) "Reading in configuration from "//trim(config_file)//"..."
     call check_file(config_file)
     call config%initialize()
     call config%load_file(filename=config_file)
@@ -154,6 +155,7 @@ program main
     call config%destroy()
 
     ! val is the original data's position on the swiss roll
+    write(*,*) "Reading in data from "//trim(infile)//"..."
     open(newunit=u, file=trim(infile), status="old")
     read(u,*) n
     allocate(point(dimensions,n))
@@ -169,6 +171,7 @@ program main
 
         if (get_bandwidth) then
 
+            write(*,*) "Writing diffusion map bandwidth analysis to "//trim(bandwidth_file)//"..."
             ! Cycle through different values of the bandwidth. See Fig. S1 in https://www.pnas.org/cgi/doi/10.1073/pnas.1003293107
             open(newunit=u, file=trim(bandwidth_file))
             do i = logbandwidth_l, logbandwidth_u
@@ -180,18 +183,25 @@ program main
 
         else
 
+            write(*,*) "Performing diffusion map calculation..."
+            write(*,*) "bandwidth = ", bandwidth
+            write(*,*) "time = ", time
+            write(*,*) "dimensions = ", dimensions
             call dm%run(distance, bandwidth, time, dimensions)
 
+            write(*,*) "Writing diffusion map eigenvalues to "//trim(evalues_file)//"..."
             open(newunit=u, file=trim(evalues_file))
             write(u,"(f12.6)") dm%eval
             close(u)
 
+            write(*,*) "Writing diffusion map eigenectors to "//trim(evects_file)//"..."
             open(newunit=u, file=trim(evects_file))
             write(n_char,'(i0)') max_output
             format_string = "("//trim(n_char)//"f12.6)"
             write(u,format_string) transpose(dm%evec)
             close(u)
 
+            write(*,*) "Writing diffusion map to "//trim(diffusionmap_file)//"..."
             open(newunit=u, file=trim(diffusionmap_file))
             write(u,"(a)") "# First column is original location on swiss roll"
             write(u,"(a)") "# Next columns are points in diffusion space"
@@ -216,8 +226,10 @@ program main
 
     if (run_pca) then
 
+        write(*,*) "Performing PCA..."
         call pca%run(point)
 
+        write(*,*) "Writing PCA eigenvalues to "//trim(pca_evalues_file)//"..."
         open(newunit=u, file=trim(pca_evalues_file))
             write(u,"(a)") "# Eigenvalues"
             write(u,"(f12.6)") pca%eval
@@ -227,12 +239,14 @@ program main
             write(u,"(f12.6)") pca%cumul_contrib
         close(u)
 
+        write(*,*) "Writing PCA eigenvectors to "//trim(pca_evects_file)//"..."
         open(newunit=u, file=trim(pca_evects_file))
         write(n_char,'(i0)') dimensions
         format_string = "("//trim(n_char)//"f12.6)"
         write(u,format_string) transpose(pca%evec)
         close(u)
 
+        write(*,*) "Writing PCA data to "//trim(pca_file)//"..."
         open(newunit=u, file=trim(pca_file))
         ! NOTE: dimensions for pca data are swapped
         do j = 1, n
