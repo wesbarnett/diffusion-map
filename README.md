@@ -30,14 +30,18 @@ code).
 
 ## Running
 
-Modify `run.json`. Then do:
+Modify `dmap.json`. Then do:
 
-    $ ./run run.json
+    $ ./run dmap.json
 
 `bandwidth.json` is for running the program iteratively over different bandwidth
 values. See Figure S1 in [this
 document](https://www.pnas.org/cgi/doi/10.1073/pnas.1003293107) for what I was
 going for with this.
+
+You can also run principal components analysis using the following file:
+
+    $ ./run pca.json
 
 ## Extras
 
