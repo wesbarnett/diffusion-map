@@ -112,10 +112,12 @@ contains
 
     end function get_distance
 
-    subroutine diffusion_map_run(this, distance, bandwidth, time)
+    subroutine diffusion_map_run(this, distance, bandwidth, time, dimensions)
 
-        integer :: i, n
-        real(8), dimension(:,:), allocatable :: similarity, markov_transition
+        integer :: i, j, n
+        integer, intent(in), optional :: dimensions
+        real(8), dimension(:,:), allocatable :: similarity, markov_transition, evec
+        real(8), dimension(:), allocatable :: eval
         real(8), dimension(:,:), allocatable, intent(in) :: distance
         real(8), intent(in) :: time, bandwidth
         class(diffusion_map), intent(inout) :: this
@@ -133,7 +135,17 @@ contains
             markov_transition(i,:) = similarity(i,:) / sum(similarity(i,:))
         end do
 
-        call get_evect(markov_transition, this%evec, this%eval)
+        call get_evect(markov_transition, evec, eval)
+
+        allocate(this%eval(1:dimensions+1))
+        this%eval = eval(1:dimensions+1)
+        allocate(this%evec(size(evec,1),1:dimensions+1))
+        this%evec = evec(:,1:dimensions+1)
+
+        allocate(this%map(n,dimensions))
+        do j = 2, dimensions+1
+            this%map(:,j-1) = this%evec(:,j)*this%eval(j)**time
+        end do
 
     end subroutine diffusion_map_run
 
@@ -146,8 +158,8 @@ program main
 
     implicit none
     integer :: i, j, n, u, logbandwidth_l, logbandwidth_u, max_output, dimensions
-    real(8), dimension(:,:), allocatable :: distance, similarity, markov_transition, point, evect
-    real(8), dimension(:), allocatable ::  evalue, val
+    real(8), dimension(:,:), allocatable :: distance, similarity, point
+    real(8), dimension(:), allocatable :: val
     real(8) :: bandwidth
     logical :: get_bandwidth, found
     character (len=256), allocatable :: config_file
@@ -244,16 +256,16 @@ program main
 
     else
 
-        call dm%run(distance, bandwidth, time)
+        call dm%run(distance, bandwidth, time, dimensions)
 
         open(newunit=u, file=trim(evalues_file))
-        write(u,"(f12.6)") dm%eval(1:max_output)
+        write(u,"(f12.6)") dm%eval
         close(u)
 
         open(newunit=u, file=trim(evects_file))
         write(n_char,'(i0)') max_output
         format_string = "("//trim(n_char)//"f12.6)"
-        write(u,format_string) transpose(dm%evec(:,1:max_output))
+        write(u,format_string) transpose(dm%evec)
         close(u)
 
         open(newunit=u, file=trim(diffusionmap_file))
@@ -267,8 +279,8 @@ program main
         do i = 1, n
             write(u,"(f12.6)", advance="no") val(i)
             ! Note that we do not output the first eigenvector since it is trivial (all 1's)
-            do j = 2, max_output
-                write(u,"(f12.6)", advance="no") dm%evec(i,j)*dm%eval(j)**time
+            do j = 1, dimensions
+                write(u,"(f12.6)", advance="no") dm%map(i,j)
             end do
             write(u,*)
         end do
