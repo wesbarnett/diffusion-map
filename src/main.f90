@@ -26,18 +26,19 @@ contains
         real(8), allocatable :: get_distance(:,:)
         real(8), allocatable, intent(in) :: indata(:,:)
         real(8) :: s
-        integer :: n, i, j, k
+        integer :: ndata, ndim, i, j, k
     
-        n = size(indata,1)
+        ndim = size(indata,1)
+        ndata = size(indata,2)
 
         ! only appropriate for cartesian data. Real world use we would use a different metric here
-        allocate(get_distance(n,n))
+        allocate(get_distance(ndata,ndata))
 
-        do i = 1, n-1
-            do j = i+1, n
+        do i = 1, ndata-1
+            do j = i+1, ndata
                 s = 0.0d0
-                do k = 1, size(indata,2)
-                    s = s + (indata(i,k)-indata(j,k))**2
+                do k = 1, ndim
+                    s = s + (indata(k,i)-indata(k,j))**2
                 end do
                 get_distance(i,j) = dsqrt(s)
                 get_distance(j,i) = get_distance(i,j)
@@ -51,6 +52,7 @@ end module subs
 program main
 
     use diffusion_map
+    use princ_comp
     use json_module
     use subs
 
@@ -67,6 +69,7 @@ program main
     type(json_file) :: config
     real(8) :: time ! diffusion "time", not simulation time
     type(diffusion_map_type) :: dm
+    type(princ_comp_type) :: pca
 
     if (command_argument_count() .ne. 1) then
         write(0,*) "ERROR: First argument should be config file."
@@ -132,10 +135,10 @@ program main
     ! val is the original data's position on the swiss roll
     open(newunit=u, file=trim(infile), status="old")
     read(u,*) n
-    allocate(point(n,dimensions))
+    allocate(point(dimensions,n))
     allocate(val(n))
     do i = 1, n
-        read(u,*) point(i,:), val(i)
+        read(u,*) point(:,i), val(i)
     end do
     close(u) 
 
@@ -179,6 +182,18 @@ program main
             write(u,"(f12.6)", advance="no") val(i)
             do j = 1, dimensions
                 write(u,"(f12.6)", advance="no") dm%map(i,j)
+            end do
+            write(u,*)
+        end do
+        close(u)
+
+        call pca%run(point)
+
+        open(newunit=u, file="pca.dat")
+        do i = 1, n
+            write(u,"(f12.6)", advance="no") val(i)
+            do j = 1, dimensions
+                write(u,"(f12.6)", advance="no") pca%data(i,j)
             end do
             write(u,*)
         end do

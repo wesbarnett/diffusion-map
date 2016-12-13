@@ -67,18 +67,17 @@ contains
         real(8), allocatable, intent(inout) :: indata(:,:)
         class(princ_comp_type), intent(inout) :: this
 
-        ndata = size(indata,1)
-        ncomp = size(indata,2)
+        ncomp = size(indata,1)
+        ndata = size(indata,2)
 
         ! mean adjust
-        do i = 1, ndata
+        do i = 1, ncomp
             indata(i,:) = indata(i,:) - sum(indata(i,:))/dble(ndata)
         end do
 
         allocate(this%cov(ncomp, ncomp))
         allocate(this%contrib(ncomp))
         allocate(this%cumul_contrib(ncomp))
-        allocate(this%data(ndata,ncomp))
 
         ! get covariance matrix
         do i = 1, ncomp
@@ -99,6 +98,7 @@ contains
         end do
 
         this%data = matmul(transpose(this%evec), indata)
+print *, "TEST"
 
     end subroutine princ_comp_run
 
