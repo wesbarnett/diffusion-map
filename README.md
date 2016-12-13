@@ -37,7 +37,9 @@ need to edit the source.
 
 ## Examples
 
-Compare the following results with those found [in this
+A few examples using this program.
+
+Compare the swiss roll and punctured sphere results with those found [in this
 paper](http://wireilla.com/papers/ijfcst/V4N6/4614ijfcst06.pdf), specifically in
 Section 3.1. Note that my value of `bandwidth` is the square of what they
 call `sigma` (I am not squaring the denominator of the Gaussian kernel in my
@@ -57,6 +59,22 @@ Colors indicate where points are in relationship to axis with greatest variance.
 ![Diffusion map (eps = 1)](examples/cluster/dmap-1.png)
 ![Diffusion map (eps = 10)](examples/cluster/dmap-10.png)
 ![Diffusion map (eps = 100)](examples/cluster/dmap-100.png)
+
+### Multiple clusters
+
+Colors indicate original cluster.
+
+#### Original data
+![Cluster dataset](examples/clusters/clusters.png)
+
+#### Principal component analysis
+![PCA](examples/cluster/pca.png)
+
+#### Diffusion maps
+![Diffusion map (eps = 1)](examples/clusters/dmap-1.png)
+![Diffusion map (eps = 10)](examples/clusters/dmap-10.png)
+![Diffusion map (eps = 100)](examples/clusters/dmap-100.png)
+
 
 ### Swiss roll
 
