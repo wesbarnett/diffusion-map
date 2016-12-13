@@ -234,9 +234,10 @@ program main
         close(u)
 
         open(newunit=u, file=trim(pca_file))
-        do i = 1, n
-            write(u,"(f12.6)", advance="no") val(i)
-            do j = 1, dimensions
+        ! NOTE: dimensions for pca data are swapped
+        do j = 1, n
+            write(u,"(f12.6)", advance="no") val(j)
+            do i = 1, dimensions
                 write(u,"(f12.6)", advance="no") pca%data(i,j)
             end do
             write(u,*)

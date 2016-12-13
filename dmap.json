@@ -1,11 +1,11 @@
 {
-    "infile": "swissroll.dat",
+    "infile": "cluster.dat",
     "dimensions": 3,
     "dmap": {
         "run": true,
-        "evalues": "dmap-evalues.dat",
-        "evects": "dmap-evects.dat",
-        "outfile": "dmap.dat",
+        "evalues": "dmap-evalues-1.dat",
+        "evects": "dmap-evects-1.dat",
+        "outfile": "dmap-1.dat",
         "bandwidth": 1.0,
         "time": 0.0
     }
