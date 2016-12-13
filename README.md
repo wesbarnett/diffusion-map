@@ -1,5 +1,5 @@
 Personal code for principal components analysis and diffusion map
-[examples](#Examples).  Specifically made to test the idea on some well-known
+[examples](#examples).  Specifically made to test the idea on some well-known
 data sets, but it wouldn't take much to modify the source for use with whatever
 data set or distance metric you desire.
 
