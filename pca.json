@@ -1,5 +1,5 @@
 {
-    "infile": "cluster.dat",
+    "infile": "swissroll.dat",
     "dimensions": 3,
     "pca": {
         "run": true,
