@@ -163,52 +163,54 @@ program main
     end do
     close(u) 
 
-    distance = get_distance(point)
+    if (run_dmap .or. get_bandwidth) then
 
-    if (get_bandwidth) then
+        distance = get_distance(point)
 
-        ! Cycle through different values of the bandwidth. See Fig. S1 in https://www.pnas.org/cgi/doi/10.1073/pnas.1003293107
-        open(newunit=u, file=trim(bandwidth_file))
-        do i = logbandwidth_l, logbandwidth_u
-            bandwidth = exp(dble(i))
-            similarity = gauss_similarity(distance, bandwidth)
-            write(u,"(i0,f12.6)") i, log(sum(similarity))
-        end do
-        close(u)
+        if (get_bandwidth) then
 
-    end if
-
-    if (run_dmap) then
-
-        call dm%run(distance, bandwidth, time, dimensions)
-
-        open(newunit=u, file=trim(evalues_file))
-        write(u,"(f12.6)") dm%eval
-        close(u)
-
-        open(newunit=u, file=trim(evects_file))
-        write(n_char,'(i0)') max_output
-        format_string = "("//trim(n_char)//"f12.6)"
-        write(u,format_string) transpose(dm%evec)
-        close(u)
-
-        open(newunit=u, file=trim(diffusionmap_file))
-        write(u,"(a)") "# First column is original location on swiss roll"
-        write(u,"(a)") "# Next columns are points in diffusion space"
-        write(u,"(a)") "# Note that first (trivial) eigenvector not used."
-        write(u,"(a)") "# In gnuplot to plot the first dimensions try:"
-        write(u,"(a)") "#   plot 'dmap.dat' u 2:3:1 w points palette"
-        write(u,"(a,f12.6)") "# time = ", time
-        write(u,"(a,f12.6)") "# bandwidth = ", bandwidth
-        format_string = "("//trim(n_char)//"f12.6)"
-        do i = 1, n
-            write(u,"(f12.6)", advance="no") val(i)
-            do j = 1, dimensions
-                write(u,"(f12.6)", advance="no") dm%map(i,j)
+            ! Cycle through different values of the bandwidth. See Fig. S1 in https://www.pnas.org/cgi/doi/10.1073/pnas.1003293107
+            open(newunit=u, file=trim(bandwidth_file))
+            do i = logbandwidth_l, logbandwidth_u
+                bandwidth = exp(dble(i))
+                similarity = gauss_similarity(distance, bandwidth)
+                write(u,"(i0,f12.6)") i, log(sum(similarity))
             end do
-            write(u,*)
-        end do
-        close(u)
+            close(u)
+
+        else
+
+            call dm%run(distance, bandwidth, time, dimensions)
+
+            open(newunit=u, file=trim(evalues_file))
+            write(u,"(f12.6)") dm%eval
+            close(u)
+
+            open(newunit=u, file=trim(evects_file))
+            write(n_char,'(i0)') max_output
+            format_string = "("//trim(n_char)//"f12.6)"
+            write(u,format_string) transpose(dm%evec)
+            close(u)
+
+            open(newunit=u, file=trim(diffusionmap_file))
+            write(u,"(a)") "# First column is original location on swiss roll"
+            write(u,"(a)") "# Next columns are points in diffusion space"
+            write(u,"(a)") "# Note that first (trivial) eigenvector not used."
+            write(u,"(a)") "# In gnuplot to plot the first dimensions try:"
+            write(u,"(a)") "#   plot 'dmap.dat' u 2:3:1 w points palette"
+            write(u,"(a,f12.6)") "# time = ", time
+            write(u,"(a,f12.6)") "# bandwidth = ", bandwidth
+            format_string = "("//trim(n_char)//"f12.6)"
+            do i = 1, n
+                write(u,"(f12.6)", advance="no") val(i)
+                do j = 1, dimensions
+                    write(u,"(f12.6)", advance="no") dm%map(i,j)
+                end do
+                write(u,*)
+            end do
+            close(u)
+
+        end if
 
     end if
 
@@ -219,16 +221,16 @@ program main
         open(newunit=u, file=trim(pca_evalues_file))
             write(u,"(a)") "# Eigenvalues"
             write(u,"(f12.6)") pca%eval
-            write(u,"(a)") "# % Contribution"
+            write(u,"(a)") "# Contribution"
             write(u,"(f12.6)") pca%contrib
-            write(u,"(a)") "# % Cumulative contribution"
-            write(u,"(f12.6)") pca%contrib
+            write(u,"(a)") "# Cumulative contribution"
+            write(u,"(f12.6)") pca%cumul_contrib
         close(u)
 
         open(newunit=u, file=trim(pca_evects_file))
         write(n_char,'(i0)') dimensions
         format_string = "("//trim(n_char)//"f12.6)"
-        write(u,format_string) transpose(dm%evec)
+        write(u,format_string) transpose(pca%evec)
         close(u)
 
         open(newunit=u, file=trim(pca_file))
