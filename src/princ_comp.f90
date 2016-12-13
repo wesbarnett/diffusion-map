@@ -98,7 +98,6 @@ contains
         end do
 
         this%data = matmul(transpose(this%evec), indata)
-print *, "TEST"
 
     end subroutine princ_comp_run
 
