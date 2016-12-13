@@ -61,10 +61,11 @@ program main
     real(8), dimension(:,:), allocatable :: distance, similarity, point
     real(8), dimension(:), allocatable :: val
     real(8) :: bandwidth
-    logical :: get_bandwidth, found
+    logical :: get_bandwidth, found, run_pca, run_dmap
     character (len=256), allocatable :: config_file
     character (len=32) :: arg, n_char
-    character (len=:), allocatable :: infile, bandwidth_file, evects_file, evalues_file, diffusionmap_file
+    character (len=:), allocatable :: infile, bandwidth_file, evects_file, evalues_file, diffusionmap_file, pca_evects_file, &
+        pca_evalues_file, pca_file
     character (len=1024) :: format_string
     type(json_file) :: config
     real(8) :: time ! diffusion "time", not simulation time
@@ -99,36 +100,56 @@ program main
     if (.not. found) then 
         bandwidth_file = "eps.dat"
     end if
-    call config%get("output.dmap",diffusionmap_file,found)
+    call config%get('dmap.run',run_dmap,found)
+    if (.not. found) then 
+        run_dmap = .false.
+    end if
+    call config%get("dmap.outfile",diffusionmap_file,found)
     if (.not. found) then 
         diffusionmap_file = "dmap.dat"
     end if
-    call config%get("bandwidth",bandwidth,found)
+    call config%get("dmap.bandwidth",bandwidth,found)
     if (.not. found) then 
         bandwidth = 1.0
     end if
-    call config%get("input.dimensions",dimensions,found)
+    call config%get("dimensions",dimensions,found)
     if (.not. found) then 
         dimensions = 3
     end if
     ! Default is 4 because we are using 3d data for this example (and first eigenvector is all 1's and is ignored)
     max_output = dimensions + 1
-    call config%get("input.file",infile,found)
+    call config%get("infile",infile,found)
     if (.not. found) then 
         infile = "infile.dat"
     end if
-    call config%get("time",time,found)
+    call config%get("dmap.time",time,found)
     if (.not. found) then 
         time = 0.0
     end if
     call check_file(infile)
-    call config%get("output.evects",evects_file,found)
+    call config%get("dmap.evects",evects_file,found)
     if (.not. found) then 
         evects_file = "evects.dat"
     end if
-    call config%get("output.evalues",evalues_file,found)
+    call config%get("dmap.evalues",evalues_file,found)
     if (.not. found) then 
         evalues_file = "evalues.dat"
+    end if
+    call config%get('pca.run',run_pca,found)
+    if (.not. found) then 
+        run_pca = .false.
+    end if
+    call config%get("pca.evects",pca_evects_file,found)
+    if (.not. found) then 
+        evects_file = "evects.dat"
+    end if
+    call config%get("pca.evalues",pca_evalues_file,found)
+    if (.not. found) then 
+        evalues_file = "evalues.dat"
+    end if
+    call config%get("pca.outfile",pca_file,found)
+    if (.not. found) then 
+        evalues_file = "pca.dat"
     end if
     call config%destroy()
 
@@ -155,7 +176,9 @@ program main
         end do
         close(u)
 
-    else
+    end if
+
+    if (run_dmap) then
 
         call dm%run(distance, bandwidth, time, dimensions)
 
@@ -187,9 +210,28 @@ program main
         end do
         close(u)
 
+    end if
+
+    if (run_pca) then
+
         call pca%run(point)
 
-        open(newunit=u, file="pca.dat")
+        open(newunit=u, file=trim(pca_evalues_file))
+            write(u,"(a)") "# Eigenvalues"
+            write(u,"(f12.6)") pca%eval
+            write(u,"(a)") "# % Contribution"
+            write(u,"(f12.6)") pca%contrib
+            write(u,"(a)") "# % Cumulative contribution"
+            write(u,"(f12.6)") pca%contrib
+        close(u)
+
+        open(newunit=u, file=trim(pca_evects_file))
+        write(n_char,'(i0)') dimensions
+        format_string = "("//trim(n_char)//"f12.6)"
+        write(u,format_string) transpose(dm%evec)
+        close(u)
+
+        open(newunit=u, file=trim(pca_file))
         do i = 1, n
             write(u,"(f12.6)", advance="no") val(i)
             do j = 1, dimensions
