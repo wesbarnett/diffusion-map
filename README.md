@@ -1,4 +1,4 @@
-Personal code for principal components analysis and diffusion map
+Personal code for principal component analysis and diffusion map
 [examples](#examples).  Specifically made to test the idea on some well-known
 data sets, but it wouldn't take much to modify the source for use with whatever
 data set or distance metric you desire.
@@ -19,7 +19,7 @@ Modify `dmap.json`. Then do:
 
     $ ./run dmap.json
 
-You can also run principal components analysis using the following file:
+You can also run principal component analysis using the following file:
 
     $ ./run pca.json
 
@@ -50,7 +50,7 @@ Colors indicate where points are in relationship to axis with greatest variance.
 #### Original data
 ![Cluster dataset](examples/cluster/cluster.png)
 
-#### Principal components analysis
+#### Principal component analysis
 ![PCA](examples/cluster/pca.png)
 
 #### Diffusion maps
@@ -66,7 +66,7 @@ roll.
 #### Original data
 ![Swiss roll dataset](examples/swiss-roll/swissroll.png)
 
-#### Principal components analysis
+#### Principal component analysis
 ![PCA](examples/swiss-roll/pca.png)
 
 #### Diffusion maps
@@ -82,7 +82,7 @@ holes in the sphere.
 #### Original data
 ![Punctured sphere dataset](examples/punctured-sphere/puncsphere.png)
 
-#### Principal components analysis
+#### Principal component analysis
 ![PCA](examples/punctured-sphere/pca.png)
 
 #### Diffusion maps
