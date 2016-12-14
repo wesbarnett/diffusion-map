@@ -1,10 +1,11 @@
 .PHONY: clean
 
+PREREQ   = lapack
 SOURCES := $(wildcard src/*.f90)
 SOURCES := $(filter-out src/main.f90, $(SOURCES))
 OBJECTS := $(SOURCES:src/%.f90=%.o)
-LDFLAGS += `pkg-config --libs lapack` 
-CFLAGS += -shared -fPIC -Wall `pkg-config --cflags lapack`
+LDFLAGS += `pkg-config --libs ${PREREQ}` 
+CFLAGS += -shared -fPIC -Wall `pkg-config --cflags ${PREREQ}`
 
 run: machlearn.so
 	@gfortran -o $@ lib/$< src/main.f90  -ljsonfortran -I/usr/include -Jinclude
