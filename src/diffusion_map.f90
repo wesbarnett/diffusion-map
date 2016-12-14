@@ -16,11 +16,10 @@ contains
         implicit none
         integer :: n, info, i, lwork, lda, ldvl, ldvr
         real(8), dimension(:), allocatable ::  wr, wi, work
-        real(8), dimension(:), allocatable, intent(inout) ::  evalues
-        real(8), dimension(:,:), allocatable, intent(inout) :: evect, p
         real(8), dimension(:,:), allocatable :: a, vl, vr
-        integer, allocatable, dimension(:) :: order
-        logical, allocatable, dimension(:) :: mask
+        real(8), dimension(:), allocatable, intent(inout) ::  evalues(:), evect(:,:), p(:,:)
+        integer, allocatable :: order(:)
+        logical, allocatable :: mask(:)
         character :: jobvl = 'N', jobvr = 'V'
 
         interface 
@@ -39,11 +38,7 @@ contains
         lda = n
         ldvl = n
         ldvr = n
-        allocate(work(lwork))
-        allocate(vl(ldvl, n))
-        allocate(vr(ldvr, n))
-        allocate(wr(n))
-        allocate(wi(n))
+        allocate(work(lwork), vl(ldvl, n), vr(ldvr, n), wr(n), wi(n))
 
 !       Get eigenvectors and eigenvalues (LAPACK)
         call dgeev(jobvl, jobvr, n, a, lda, wr, wi, vl, ldvl, vr, ldvr, work, lwork, info)
@@ -53,16 +48,14 @@ contains
 
 !       Sort the evalues in descending so we can use the top components for
 !       later calcs
-        allocate(order(n))
-        allocate(mask(n))
+        allocate(order(n), mask(n))
         mask = .true.
         do i = lbound(wr,1), ubound(wr,1)
             order(i) = maxloc(wr,1,mask)
             mask(order(i)) = .false.
         end do
 
-        allocate(evect(ldvr, n))
-        allocate(evalues(n))
+        allocate(evect(ldvr, n), evalues(n))
         evalues = wr(order)
         evect = vr(:,order)
 
