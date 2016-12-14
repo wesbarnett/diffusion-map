@@ -19,6 +19,7 @@ machlearn.so: ${OBJECTS}
 	@gfortran -c -o src/$@ $< -Jinclude ${LDFLAGS} ${CFLAGS}
 
 clean:
+	@rm -f *.mod
 	@rm -f src/*.o
 	@rm -rf include
 	@rm -rf lib
