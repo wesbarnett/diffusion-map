@@ -1,7 +1,8 @@
 # First column is original location on swiss roll
 # Next columns are points in diffusion space
+# Note that first (trivial) eigenvector not used.
 # In gnuplot to plot the first dimensions try:
-#   plot 'evects.dat' u 2:3:1 w points palette
+#   plot 'dmap.dat' u 2:3:1 w points palette
 # time =     0.000000
 # bandwidth =     1.000000
     3.281000   -0.008278   -0.003555   -0.000157
