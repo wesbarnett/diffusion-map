@@ -38,6 +38,9 @@ contains
         ! Get eigenvectors and eigenvalues (LAPACK)
         ! matrix "a" is returned as the eigenvectors
         call dsyev(jobz, uplo, n, a, lda, evalues, work, lwork, info)
+        if(info .ne. 0) then
+            write(*,*) "ERROR: Eigenvector calculation failed."
+        end if
 
         ! Sort the evalues in descending so we can use the top components for later calcs
         allocate(order(N), mask(n))
