@@ -47,7 +47,7 @@ contains
 
     end function get_distance
 
-    function get_rmsd(trj, ndxgrp)
+    function get_rmsd(trj)
 
         use gmxfort_trajectory
         use omp_lib
@@ -55,11 +55,10 @@ contains
         implicit none
         real(8), allocatable :: get_rmsd(:,:)
         type(Trajectory), intent(inout) :: trj
-        character (len=*), intent(in) :: ndxgrp
         integer :: nframe, natoms, nthreads
 
         nframe = trj%nframes
-        natoms = trj%natoms(ndxgrp)
+        natoms = trj%natoms()
         allocate(get_rmsd(nframe,nframe))
 
         !$omp parallel
@@ -83,12 +82,11 @@ contains
 
                 do j = i+1, nframe
 
-
                     s = 0.0d0
                     do k = 1, natoms
 
-                        atom_i = trj%x(i,k,ndxgrp)
-                        atom_j = trj%x(j,k,ndxgrp)
+                        atom_i = trj%x(i,k)
+                        atom_j = trj%x(j,k)
 
                         do l = 1, 3
                             s = s + (atom_i(l)-atom_j(l))**2
@@ -124,14 +122,14 @@ program main
 
     implicit none
     integer :: i, j, n, u, logbandwidth_l, logbandwidth_u, max_output, dimensions
-    real(8), dimension(:,:), allocatable :: distance, similarity, point
-    real(8), dimension(:), allocatable :: val
+    real(8), dimension(:,:), allocatable :: distance, point
+    real(8), dimension(:), allocatable :: val, logsumsim
     real(8) :: bandwidth
     logical :: get_bandwidth, found, run_pca, run_dmap
     character (len=256), allocatable :: config_file
     character (len=32) :: arg, n_char
     character (len=:), allocatable :: bandwidth_file, evects_file, evalues_file, diffusionmap_file, pca_evects_file, &
-        pca_evalues_file, pca_file, xtcfile, ndxfile, ndxgrp
+        pca_evalues_file, pca_file, xtcfile
     character (len=1024) :: format_string
     type(json_file) :: config
     real(8) :: time ! diffusion "time", not simulation time
@@ -225,14 +223,6 @@ program main
     if (.not. found) then 
         xtcfile = "traj.xtc"
     end if
-    call config%get('sim.ndx',ndxfile,found)
-    if (.not. found) then 
-        ndxfile = "index.ndx"
-    end if
-    call config%get('sim.ndxgrp',ndxgrp,found)
-    if (.not. found) then 
-        ndxgrp = "site"
-    end if
 
     call config%destroy()
 
@@ -248,22 +238,45 @@ program main
 !   end do
 !   close(u) 
 
-    call trj%read(xtcfile, ndxfile)
+    call trj%read(xtcfile)
 
     if (run_dmap .or. get_bandwidth) then
 
         write(*,*) "Calculating RMSD..."
-        distance = get_rmsd(trj, ndxgrp)
+        distance = get_rmsd(trj)
 
         if (get_bandwidth) then
 
-            write(*,*) "Writing diffusion map bandwidth analysis to "//trim(bandwidth_file)//"..."
+            write(*,*) "Performing diffusion map bandwidth analysis..."
             ! Cycle through different values of the bandwidth. See Fig. S1 in https://www.pnas.org/cgi/doi/10.1073/pnas.1003293107
+
+            allocate(logsumsim(logbandwidth_l:logbandwidth_u))
+
+            !$omp parallel 
+
+            block
+
+                real(8) :: bandwidth
+                real(8), dimension(:,:), allocatable :: similarity
+                integer :: i
+
+                !$omp do
+                do i = logbandwidth_l, logbandwidth_u
+                    write(*,*) i
+                    bandwidth = exp(dble(i))
+                    similarity = gauss_similarity(distance, bandwidth)
+                    logsumsim(i) = log(sum(similarity))
+                end do
+                !$omp end do
+
+            end block
+
+            !$omp end parallel 
+
+            write(*,*) "Writing diffusion map bandwidth analysis to "//trim(bandwidth_file)//"..."
             open(newunit=u, file=trim(bandwidth_file))
             do i = logbandwidth_l, logbandwidth_u
-                bandwidth = exp(dble(i))
-                similarity = gauss_similarity(distance, bandwidth)
-                write(u,"(i0,f12.6)") i, log(sum(similarity))
+                write(u,"(i0,f12.6)") i, logsumsim(i)
             end do
             close(u)
 
