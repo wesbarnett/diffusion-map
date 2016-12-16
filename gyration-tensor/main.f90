@@ -64,7 +64,7 @@ program main
     implicit none
     character (len=256), allocatable :: config_file
     character (len=32) :: arg
-    real(8) :: rcm(3), atom(3), atomj(3), atomk(3)
+    real(8) :: rcm(3), atom(3), atomj(3), atomk(3), Rg
     real(8), allocatable :: S(:,:), S_evect(:,:), S_eval(:)
     character (len=:), allocatable :: outfile, xtcfile
     type(json_file) :: config
@@ -137,8 +137,10 @@ program main
         S = S / dble(natoms)
 
         ! Diagonalize 
+        ! sqrt(S_eval) = principal moments of the gyration tensor
         call get_evect_sym(S, S_evect, S_eval)       
-        write(u, "(3f12.6)") S_eval
+        Rg = sqrt(sum(abs(S_eval)))
+        write(u, "(4f12.6)") sqrt(abs(S_eval)), Rg
         deallocate(S_evect, S_eval)
 
     end do

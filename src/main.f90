@@ -129,7 +129,7 @@ program main
     character (len=256), allocatable :: config_file
     character (len=32) :: arg, n_char
     character (len=:), allocatable :: bandwidth_file, evects_file, evalues_file, diffusionmap_file, pca_evects_file, &
-        pca_evalues_file, pca_file, xtcfile
+        pca_evalues_file, pca_file, xtcfile, ndxfile, ndxgroup
     character (len=1024) :: format_string
     type(json_file) :: config
     real(8) :: time ! diffusion "time", not simulation time
@@ -218,6 +218,14 @@ program main
     if (.not. found) then 
         xtcfile = "traj.xtc"
     end if
+    call config%get('sim.ndx',ndxfile,found)
+    if (.not. found) then 
+        ndxfile = "index.ndx"
+    end if
+    call config%get('sim.group',ndxgroup,found)
+    if (.not. found) then 
+        ndxgroup = "C"
+    end if
 
     call config%destroy()
 
@@ -233,7 +241,9 @@ program main
 !   end do
 !   close(u) 
 
+! FIXME: use index file
     call trj%read(xtcfile)
+!   call trj%read(xtcfile, ndxfile, ndxgroup)
     dimensions = trj%nframes
 
     if (run_dmap .or. get_bandwidth) then
