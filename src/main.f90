@@ -121,7 +121,7 @@ program main
     use subs
 
     implicit none
-    integer :: i, j, n, u, logbandwidth_l, logbandwidth_u, max_output, dimensions
+    integer :: i, j, n, u, logbandwidth_l, logbandwidth_u, dimensions
     real(8), dimension(:,:), allocatable :: distance, point
     real(8), dimension(:), allocatable :: val, logsumsim
     real(8) :: bandwidth
@@ -291,7 +291,7 @@ program main
 
             write(*,*) "Writing diffusion map eigenectors to "//trim(evects_file)//"..."
             open(newunit=u, file=trim(evects_file))
-            write(n_char,'(i0)') max_output
+            write(n_char,'(i0)') dimensions
             format_string = "("//trim(n_char)//"f12.6)"
             write(u,format_string) transpose(dm%evec)
             close(u)
@@ -306,10 +306,10 @@ program main
             write(u,"(a,f12.6)") "# time = ", time
             write(u,"(a,f12.6)") "# bandwidth = ", bandwidth
             format_string = "("//trim(n_char)//"f12.6)"
-            do i = 1, n
+            do i = 1, dimensions
                 ! TODO: calculate some other value and place here
                 !write(u,"(f12.6)", advance="no") val(i)
-                do j = 1, trj%nframes
+                do j = 1, dimensions
                     write(u,"(f12.6)", advance="no") dm%map(i,j)
                 end do
                 write(u,*)

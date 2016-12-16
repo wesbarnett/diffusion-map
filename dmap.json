@@ -1,13 +1,13 @@
 {
     "sim": {
-        "xtc": "/node2/wes/OCTANE/trajout.xtc"
+        "xtc": "/node2/wes/OCTANE/trajout_1000.xtc"
     },
     "dmap": {
         "run": true,
         "evalues": "dmap-evalues.dat",
         "evects": "dmap-evects.dat",
         "outfile": "dmap.dat",
-        "bandwidth": 0.000335463,
+        "bandwidth": 0.001,
         "time": 0.0
     }
 }
