@@ -1,7 +1,8 @@
 {
-    "input": {
-        "file": "swissroll.dat",
-        "dimensions": 3
+    "sim": {
+        "xtc": "/node2/wes/OCTANE/prd.xtc",
+        "ndx": "/node2/wes/OCTANE/index.ndx",
+        "ndxgrp": "C"
     },
     "bandwidth_calc": {
         "get": true,

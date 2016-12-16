@@ -50,42 +50,65 @@ contains
     function get_rmsd(trj, ndxgrp)
 
         use gmxfort_trajectory
+        use omp_lib
 
         implicit none
         real(8), allocatable :: get_rmsd(:,:)
         type(Trajectory), intent(inout) :: trj
-        real(8) :: s, atom_i(3), atom_j(3)
-        integer :: nframe, natoms, i, j, k, l
         character (len=*), intent(in) :: ndxgrp
+        integer :: nframe, natoms, nthreads
 
         nframe = trj%nframes
         natoms = trj%natoms(ndxgrp)
-
         allocate(get_rmsd(nframe,nframe))
 
-        do i = 1, nframe-1
+        !$omp parallel
+        !$omp master
+            nthreads = omp_get_num_threads()
+            write(*,"(a,i0,a)") "Using ", nthreads, " OpenMP threads..."
+        !$omp end master
+        !$omp end parallel
+     
+        !$omp parallel 
 
-            do j = i+1, nframe
+        block
 
-                s = 0.0d0
-                do k = 1, natoms
+            integer :: i, j, k, l
+            real(8) :: s, atom_i(3), atom_j(3)
 
-                    atom_i = trj%x(i,k,ndxgrp)
-                    atom_j = trj%x(j,k,ndxgrp)
+            !$omp do 
+            do i = 1, nframe-1
 
-                    do l = 1, 3
-                        s = s + (atom_i(l)-atom_j(l))**2
+                write(*,*) i
+
+                do j = i+1, nframe
+
+
+                    s = 0.0d0
+                    do k = 1, natoms
+
+                        atom_i = trj%x(i,k,ndxgrp)
+                        atom_j = trj%x(j,k,ndxgrp)
+
+                        do l = 1, 3
+                            s = s + (atom_i(l)-atom_j(l))**2
+                        end do
+
                     end do
+
+                    s = s / dble(natoms)
+
+                    get_rmsd(i,j) = dsqrt(s)
+                    get_rmsd(j,i) = get_rmsd(i,j)
 
                 end do
 
-                s = s / dble(natoms)
-
-                get_rmsd(i,j) = dsqrt(s)
-                get_rmsd(j,i) = get_rmsd(i,j)
-
             end do
-        end do
+            !$omp end do
+
+        end block
+
+        !$omp end parallel
 
     end function get_rmsd
 
@@ -107,7 +130,7 @@ program main
     logical :: get_bandwidth, found, run_pca, run_dmap
     character (len=256), allocatable :: config_file
     character (len=32) :: arg, n_char
-    character (len=:), allocatable :: infile, bandwidth_file, evects_file, evalues_file, diffusionmap_file, pca_evects_file, &
+    character (len=:), allocatable :: bandwidth_file, evects_file, evalues_file, diffusionmap_file, pca_evects_file, &
         pca_evalues_file, pca_file, xtcfile, ndxfile, ndxgrp
     character (len=1024) :: format_string
     type(json_file) :: config
@@ -152,12 +175,6 @@ program main
     if (.not. found) then 
         dimensions = 3
     end if
-    ! Default is 4 because we are using 3d data for this example (and first eigenvector is all 1's and is ignored)
-    max_output = dimensions + 1
-    call config%get("infile",infile,found)
-    if (.not. found) then 
-        infile = "infile.dat"
-    end if
 
     ! DIffusion map input
     call config%get('dmap.run',run_dmap,found)
@@ -176,7 +193,6 @@ program main
     if (.not. found) then 
         time = 0.0
     end if
-    call check_file(infile)
     call config%get("dmap.evects",evects_file,found)
     if (.not. found) then 
         evects_file = "evects.dat"
@@ -205,16 +221,20 @@ program main
     end if
 
     ! Simulation input
-
-    call config%destroy()
     call config%get('sim.xtc',xtcfile,found)
     if (.not. found) then 
         xtcfile = "traj.xtc"
     end if
-    call config%get('sim.ndx',xtcfile,found)
+    call config%get('sim.ndx',ndxfile,found)
     if (.not. found) then 
-        xtcfile = "index.ndx"
+        ndxfile = "index.ndx"
     end if
+    call config%get('sim.ndxgrp',ndxgrp,found)
+    if (.not. found) then 
+        ndxgrp = "site"
+    end if
+
+    call config%destroy()
 
 ! TODO: remove; calculating from cartesian coordinates
     ! val is the original data's position on the swiss roll
@@ -232,6 +252,7 @@ program main
 
     if (run_dmap .or. get_bandwidth) then
 
+        write(*,*) "Calculating RMSD..."
         distance = get_rmsd(trj, ndxgrp)
 
         if (get_bandwidth) then
