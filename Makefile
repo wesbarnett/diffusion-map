@@ -1,23 +1,22 @@
 .PHONY: clean
 
-PREREQ   = lapack
 SOURCES := $(wildcard src/*.f90)
 SOURCES := $(filter-out src/main.f90, $(SOURCES))
 OBJECTS := $(SOURCES:src/%.f90=%.o)
-LDFLAGS += `pkg-config --libs ${PREREQ}` 
-CFLAGS += -shared -fPIC -Wall `pkg-config --cflags ${PREREQ}`
+LDFLAGS = -llapack -lblas -lgmxfort
+CFLAGS  = -shared -fPIC -Wall 
 
 run: machlearn.so
-	@gfortran -o $@ lib/$< src/main.f90  -ljsonfortran -I/usr/include -Jinclude
+	@gfortran -o $@ src/main.f90  lib/$< -I/usr/include -Iinclude -Jinclude -ljsonfortran
 
 machlearn.so: ${OBJECTS}
 	@mkdir -p include
 	@mkdir -p lib
-	@gfortran -o lib/$@ src/*.o  ${LDFLAGS} ${CFLAGS}
+	@gfortran -o lib/$@ src/*.o  ${CFLAGS} ${LDFLAGS} 
 
 %.o: src/%.f90
 	@mkdir -p include
-	@gfortran -c -o src/$@ $< -Jinclude ${LDFLAGS} ${CFLAGS}
+	@gfortran -c -o src/$@ $< -Jinclude ${CFLAGS} ${LDFLAGS} 
 
 clean:
 	@rm -f *.mod

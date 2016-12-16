@@ -47,10 +47,53 @@ contains
 
     end function get_distance
 
+    function get_rmsd(trj, ndxgrp)
+
+        use gmxfort_trajectory
+
+        implicit none
+        real(8), allocatable :: get_rmsd(:,:)
+        type(Trajectory), intent(inout) :: trj
+        real(8) :: s, atom_i(3), atom_j(3)
+        integer :: nframe, natoms, i, j, k, l
+        character (len=*), intent(in) :: ndxgrp
+
+        nframe = trj%nframes
+        natoms = trj%natoms(ndxgrp)
+
+        allocate(get_rmsd(nframe,nframe))
+
+        do i = 1, nframe-1
+
+            do j = i+1, nframe
+
+                s = 0.0d0
+                do k = 1, natoms
+
+                    atom_i = trj%x(i,k,ndxgrp)
+                    atom_j = trj%x(j,k,ndxgrp)
+
+                    do l = 1, 3
+                        s = s + (atom_i(l)-atom_j(l))**2
+                    end do
+
+                end do
+
+                s = s / dble(natoms)
+
+                get_rmsd(i,j) = dsqrt(s)
+                get_rmsd(j,i) = get_rmsd(i,j)
+
+            end do
+        end do
+
+    end function get_rmsd
+
 end module subs
 
 program main
 
+    use gmxfort_trajectory
     use diffusion_map
     use princ_comp
     use json_module
@@ -65,12 +108,13 @@ program main
     character (len=256), allocatable :: config_file
     character (len=32) :: arg, n_char
     character (len=:), allocatable :: infile, bandwidth_file, evects_file, evalues_file, diffusionmap_file, pca_evects_file, &
-        pca_evalues_file, pca_file
+        pca_evalues_file, pca_file, xtcfile, ndxfile, ndxgrp
     character (len=1024) :: format_string
     type(json_file) :: config
     real(8) :: time ! diffusion "time", not simulation time
     type(diffusion_map_type) :: dm
     type(princ_comp_type) :: pca
+    type(Trajectory) :: trj
 
     if (command_argument_count() .ne. 1) then
         write(0,*) "ERROR: First argument should be config file."
@@ -85,6 +129,8 @@ program main
     call config%initialize()
     call config%load_file(filename=config_file)
     call config%print_file()
+
+    ! Bandwidth calc input
     call config%get('bandwidth_calc.get',get_bandwidth,found)
     if (.not. found) then 
         get_bandwidth=.false.
@@ -101,6 +147,19 @@ program main
     if (.not. found) then 
         bandwidth_file = "eps.dat"
     end if
+
+    call config%get("dimensions",dimensions,found)
+    if (.not. found) then 
+        dimensions = 3
+    end if
+    ! Default is 4 because we are using 3d data for this example (and first eigenvector is all 1's and is ignored)
+    max_output = dimensions + 1
+    call config%get("infile",infile,found)
+    if (.not. found) then 
+        infile = "infile.dat"
+    end if
+
+    ! DIffusion map input
     call config%get('dmap.run',run_dmap,found)
     if (.not. found) then 
         run_dmap = .false.
@@ -112,16 +171,6 @@ program main
     call config%get("dmap.bandwidth",bandwidth,found)
     if (.not. found) then 
         bandwidth = 1.0
-    end if
-    call config%get("dimensions",dimensions,found)
-    if (.not. found) then 
-        dimensions = 3
-    end if
-    ! Default is 4 because we are using 3d data for this example (and first eigenvector is all 1's and is ignored)
-    max_output = dimensions + 1
-    call config%get("infile",infile,found)
-    if (.not. found) then 
-        infile = "infile.dat"
     end if
     call config%get("dmap.time",time,found)
     if (.not. found) then 
@@ -136,6 +185,8 @@ program main
     if (.not. found) then 
         evalues_file = "evalues.dat"
     end if
+
+    ! PCA input
     call config%get('pca.run',run_pca,found)
     if (.not. found) then 
         run_pca = .false.
@@ -152,22 +203,36 @@ program main
     if (.not. found) then 
         pca_file = "pca.dat"
     end if
-    call config%destroy()
 
+    ! Simulation input
+
+    call config%destroy()
+    call config%get('sim.xtc',xtcfile,found)
+    if (.not. found) then 
+        xtcfile = "traj.xtc"
+    end if
+    call config%get('sim.ndx',xtcfile,found)
+    if (.not. found) then 
+        xtcfile = "index.ndx"
+    end if
+
+! TODO: remove; calculating from cartesian coordinates
     ! val is the original data's position on the swiss roll
-    write(*,*) "Reading in data from "//trim(infile)//"..."
-    open(newunit=u, file=trim(infile), status="old")
-    read(u,*) n
-    allocate(point(dimensions,n))
-    allocate(val(n))
-    do i = 1, n
-        read(u,*) point(:,i), val(i)
-    end do
-    close(u) 
+!   write(*,*) "Reading in data from "//trim(infile)//"..."
+!   open(newunit=u, file=trim(infile), status="old")
+!   read(u,*) n
+!   allocate(point(dimensions,n))
+!   allocate(val(n))
+!   do i = 1, n
+!       read(u,*) point(:,i), val(i)
+!   end do
+!   close(u) 
+
+    call trj%read(xtcfile, ndxfile)
 
     if (run_dmap .or. get_bandwidth) then
 
-        distance = get_distance(point)
+        distance = get_rmsd(trj, ndxgrp)
 
         if (get_bandwidth) then
 
@@ -187,7 +252,7 @@ program main
             write(*,*) "bandwidth = ", bandwidth
             write(*,*) "time = ", time
             write(*,*) "dimensions = ", dimensions
-            call dm%run(distance, bandwidth, time, dimensions)
+            call dm%run(distance, bandwidth, time, trj%nframes)
 
             write(*,*) "Writing diffusion map eigenvalues to "//trim(evalues_file)//"..."
             open(newunit=u, file=trim(evalues_file))
@@ -213,7 +278,7 @@ program main
             format_string = "("//trim(n_char)//"f12.6)"
             do i = 1, n
                 write(u,"(f12.6)", advance="no") val(i)
-                do j = 1, dimensions
+                do j = 1, trj%nframes
                     write(u,"(f12.6)", advance="no") dm%map(i,j)
                 end do
                 write(u,*)
@@ -227,7 +292,8 @@ program main
     if (run_pca) then
 
         write(*,*) "Performing PCA..."
-        call pca%run(point)
+        ! TODO, just dihedral angles
+        !call pca%run(point)
 
         write(*,*) "Writing PCA eigenvalues to "//trim(pca_evalues_file)//"..."
         open(newunit=u, file=trim(pca_evalues_file))
