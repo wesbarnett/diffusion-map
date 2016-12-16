@@ -169,11 +169,6 @@ program main
         bandwidth_file = "eps.dat"
     end if
 
-    call config%get("dimensions",dimensions,found)
-    if (.not. found) then 
-        dimensions = 3
-    end if
-
     ! DIffusion map input
     call config%get('dmap.run',run_dmap,found)
     if (.not. found) then 
@@ -239,6 +234,7 @@ program main
 !   close(u) 
 
     call trj%read(xtcfile)
+    dimensions = trj%nframes
 
     if (run_dmap .or. get_bandwidth) then
 
@@ -311,7 +307,8 @@ program main
             write(u,"(a,f12.6)") "# bandwidth = ", bandwidth
             format_string = "("//trim(n_char)//"f12.6)"
             do i = 1, n
-                write(u,"(f12.6)", advance="no") val(i)
+                ! TODO: calculate some other value and place here
+                !write(u,"(f12.6)", advance="no") val(i)
                 do j = 1, trj%nframes
                     write(u,"(f12.6)", advance="no") dm%map(i,j)
                 end do
@@ -350,7 +347,8 @@ program main
         open(newunit=u, file=trim(pca_file))
         ! NOTE: dimensions for pca data are reversed from those of the diffusion map
         do j = 1, n
-            write(u,"(f12.6)", advance="no") val(j)
+            ! TODO: calculate some other value and place here
+            !write(u,"(f12.6)", advance="no") val(j)
             do i = 1, dimensions
                 write(u,"(f12.6)", advance="no") pca%x(i,j)
             end do

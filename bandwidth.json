@@ -1,8 +1,6 @@
 {
     "sim": {
-        "xtc": "/node2/wes/OCTANE/trajout.xtc",
-        "ndx": "/node2/wes/OCTANE/index.ndx",
-        "ndxgrp": "C"
+        "xtc": "/node2/wes/OCTANE/trajout.xtc"
     },
     "bandwidth_calc": {
         "get": true,

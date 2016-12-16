@@ -1,12 +1,13 @@
 {
-    "infile": "swissroll.dat",
-    "dimensions": 3,
+    "sim": {
+        "xtc": "/node2/wes/OCTANE/trajout.xtc"
+    },
     "dmap": {
         "run": true,
-        "evalues": "dmap-evalues-1.dat",
-        "evects": "dmap-evects-1.dat",
-        "outfile": "dmap-1.dat",
-        "bandwidth": 1.0,
+        "evalues": "dmap-evalues.dat",
+        "evects": "dmap-evects.dat",
+        "outfile": "dmap.dat",
+        "bandwidth": 0.000335463,
         "time": 0.0
     }
 }
