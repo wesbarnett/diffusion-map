@@ -160,6 +160,9 @@ program main
     read(u,*) n
     allocate(point(dimensions,n))
     allocate(val(n))
+
+    ! Each point is stored in a row
+    ! Data is stored in columns (x, y, and z)
     do i = 1, n
         read(u,*) point(:,i), val(i)
     end do
