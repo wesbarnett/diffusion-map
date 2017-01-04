@@ -123,9 +123,9 @@ original simulation trajectory is too large to post here. To reproduce the data,
 use [this input](examples/octane/prd.tpr) file with GROMACS and run the
 simulation. Then use `gmx trjconv` to fit the octane's translational and
 rotational motion, saving only the octane's coordinates. Use the output
-coordinate file (xtc) as the input for this analysis (by default it will output
-10,000 frames, so you may want to reduce this some from the diffusion map
-analysis, since it is very memory intensive).
+coordinate file (xtc) as the input for this analysis. By default the simulation
+will output 10,000 frames, so you may want to reduce this some for the diffusion
+map analysis, since it is very memory intensive.
 
 #### Principal component analysis
 ![PCA](examples/octane/pca.png)
