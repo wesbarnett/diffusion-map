@@ -122,12 +122,11 @@ program main
 
             atom = trj%x(i,j) - rcm
 
-            do k = 1, ndim-1
+            do k = 1, ndim
 
-                do l = k+1, ndim
+                do l = 1, ndim
 
                     S(k,l) = S(k,l) + atom(k)*atom(l)
-                    S(l,k) = S(k,l)
 
                 end do
 
@@ -139,8 +138,8 @@ program main
         ! Diagonalize 
         ! sqrt(S_eval) = principal moments of the gyration tensor
         call get_evect_sym(S, S_evect, S_eval)       
-        Rg = sqrt(sum(abs(S_eval)))
-        write(u, "(4f12.6)") sqrt(abs(S_eval)), Rg
+        Rg = sqrt(sum(S_eval))
+        write(u, "(4f12.6)") sqrt(S_eval), Rg
         deallocate(S_evect, S_eval)
 
     end do
