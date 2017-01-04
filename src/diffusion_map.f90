@@ -69,7 +69,7 @@ contains
         real(8), dimension(:,:), allocatable :: gauss_similarity
 
         allocate(gauss_similarity(size(distance,1),size(distance,2)))
-        gauss_similarity = exp( - ( (distance**2) / (2*bandwidth) ) )
+        gauss_similarity = exp( - ( (distance**2) / (2.0d0*bandwidth) ) )
 
     end function gauss_similarity
 
