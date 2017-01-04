@@ -60,8 +60,6 @@ contains
         integer :: ncomp, ndata, i, j, u
         real(8), allocatable, intent(inout) :: indata(:,:)
         class(princ_comp_type), intent(inout) :: this
-character (len=1024) :: format_string
-character (len=32) :: n_char
 
         ncomp = size(indata,1)
         ndata = size(indata,2)
@@ -70,13 +68,6 @@ character (len=32) :: n_char
         do i = 1, ncomp
             indata(i,:) = indata(i,:) - sum(indata(i,:))/dble(ndata)
         end do
-
-open(newunit=u, file="data.dat")
-write(n_char,'(i0)') ncomp
-format_string = "("//trim(n_char)//"f12.6)"
-write(U, format_string) indata
-close(u)
-
 
         allocate(this%cov(ncomp, ncomp))
         allocate(this%contrib(ncomp))
