@@ -131,4 +131,4 @@ analysis, since it is very memory intensive).
 ![PCA](examples/octane/pca.png)
 
 #### Diffusion map
-Coming soon.
+![Diffusion map](examples/octane/dmap.png)
