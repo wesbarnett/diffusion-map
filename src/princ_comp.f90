@@ -57,7 +57,7 @@ contains
 
     subroutine princ_comp_run(this, indata)
 
-        integer :: ncomp, ndata, i, j, u
+        integer :: ncomp, ndata, i, j
         real(8), allocatable, intent(inout) :: indata(:,:)
         class(princ_comp_type), intent(inout) :: this
 

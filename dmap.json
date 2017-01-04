@@ -1,7 +1,6 @@
 {
     "sim": {
-        "xtc": "/node2/wes/OCTANE/trajout_1000.xtc",
-        "ndx": "/node2/wes/OCTANE/index.ndx"
+        "xtc": "/node2/wes/OCTANE/trajout.xtc"
     },
     "dmap": {
         "run": true,
