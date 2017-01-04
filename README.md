@@ -112,7 +112,7 @@ holes in the sphere.
 The original data is from a Molecular Dynamics simulation I performed of a
 single octane in water. I used the RMSD between each pair of simulation
 snapshots of the octane as the distance metric for the diffusion map
-calculation (10,000 snapshots total). For the principal components analysis I
+calculation (1,000 snapshots total). For the principal components analysis I
 used the dihedral angles as the metric. The colors indicate the radius of
 gyration of the octane. Compare these results with Figure S2.C from [this
 paper's SI
@@ -123,7 +123,9 @@ original simulation trajectory is too large to post here. To reproduce the data,
 use [this input](examples/octane/prd.tpr) file with GROMACS and run the
 simulation. Then use `gmx trjconv` to fit the octane's translational and
 rotational motion, saving only the octane's coordinates. Use the output
-coordinate file (xtc) as the input for this analysis.
+coordinate file (xtc) as the input for this analysis (by default it will output
+10,000 frames, so you may want to reduce this some from the diffusion map
+analysis, since it is very memory intensive).
 
 #### Principal component analysis
 ![PCA](examples/octane/pca.png)
