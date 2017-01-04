@@ -75,7 +75,6 @@ Colors indicate original cluster.
 ![Diffusion map (eps = 10)](examples/clusters/dmap-10.png)
 ![Diffusion map (eps = 100)](examples/clusters/dmap-100.png)
 
-
 ### Swiss roll
 
 Colors indicate where points are in relationship to the center of the swiss
@@ -108,3 +107,26 @@ holes in the sphere.
 ![Diffusion map (eps = 10)](examples/punctured-sphere/dmap-10.png)
 ![Diffusion map (eps = 100)](examples/punctured-sphere/dmap-100.png)
 
+### Simulation of octane in water
+
+The original data is from a Molecular Dynamics simulation I performed of a
+single octane in water. I used the RMSD between each pair of simulation
+snapshots of the octane as the distance metric for the diffusion map
+calculation (10,000 snapshots total). For the principal components analysis I
+used the dihedral angles as the metric. The colors indicate the radius of
+gyration of the octane. Compare these results with Figure S2.C from [this
+paper's SI
+(PDF)](http://www.pnas.org/content/suppl/2010/07/14/1003293107.DCSupplemental/pnas.1003293107_SI.pdf).
+
+The branch `alkane` has the modified code that performs these calculations. The
+original simulation trajectory is too large to post here. To reproduce the data,
+use [this input](examples/octane/prd.tpr) file with GROMACS and run the
+simulation. Then use `gmx trjconv` to fit the octane's translational and
+rotational motion, saving only the octane's coordinates. Use the output
+coordinate file (xtc) as the input for this analysis.
+
+#### Principal component analysis
+![PCA](examples/octane/pca.png)
+
+#### Diffusion map
+Coming soon.
