@@ -87,10 +87,7 @@ contains
 
                         atom_i = trj%x(i,k)
                         atom_j = trj%x(j,k)
-
-                        do l = 1, 3
-                            s = s + (atom_i(l)-atom_j(l))**2
-                        end do
+                        s = s + sum((atom_i - atom_j)**2)
 
                     end do
 
