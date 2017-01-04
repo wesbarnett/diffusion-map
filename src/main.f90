@@ -112,14 +112,15 @@ end module subs
 program main
 
     use gmxfort_trajectory
+    use gmxfort_utils, only: dihedral_angle
     use diffusion_map
     use princ_comp
     use json_module
     use subs
 
     implicit none
-    integer :: i, j, n, u, logbandwidth_l, logbandwidth_u, dimensions
-    real(8), dimension(:,:), allocatable :: distance, point
+    integer :: i, j, n, u, logbandwidth_l, logbandwidth_u, dimensions, nangles, ncomp
+    real(8), dimension(:,:), allocatable :: distance, indata
     real(8), dimension(:), allocatable :: val, logsumsim
     real(8) :: bandwidth
     logical :: get_bandwidth, found, run_pca, run_dmap
@@ -242,6 +243,8 @@ program main
     call trj%read(xtcfile)
 !   call trj%read(xtcfile, ndxfile, ndxgroup)
     dimensions = trj%nframes
+    nangles = trj%natoms() - 3
+    ncomp = nangles*2
 
     if (run_dmap .or. get_bandwidth) then
 
@@ -331,8 +334,51 @@ program main
     if (run_pca) then
 
         write(*,*) "Performing PCA..."
-        ! TODO, just dihedral angles
-        !call pca%run(point)
+        ! Calculate cosine and sine of dihedral angles for dihedral principal components analysis
+        allocate(indata(ncomp, trj%nframes))
+        !$omp parallel 
+
+        block
+
+            integer :: i, j, k
+            real(8) :: a(3), b(3), c(3), d(3), box(3,3)
+            real(8), allocatable :: ang(:)
+
+            allocate(ang(nangles))
+
+            !$omp do 
+            do i = 1, trj%nframes
+
+                write(*,*) i
+
+                do j = 1, nangles
+                    
+                    a = trj%x(i, j)
+                    b = trj%x(i, j+1)
+                    c = trj%x(i, j+2)
+                    d = trj%x(i, j+3)
+                    box = trj%box(i)
+                    ang(j) = dihedral_angle(a, b, c, d, box)
+
+                end do
+
+                k = 1
+                do j = 1, ncomp, 2
+                    indata(j,i) = dcos(ang(k));
+                    indata(j+1,i) = dsin(ang(k));
+                    K = K + 1
+                end do
+
+            end do
+            !$omp end do
+
+            deallocate(ang)
+
+        end block
+
+        !$omp end parallel
+
+        call pca%run(indata)
 
         write(*,*) "Writing PCA eigenvalues to "//trim(pca_evalues_file)//"..."
         open(newunit=u, file=trim(pca_evalues_file))
@@ -346,18 +392,15 @@ program main
 
         write(*,*) "Writing PCA eigenvectors to "//trim(pca_evects_file)//"..."
         open(newunit=u, file=trim(pca_evects_file))
-        write(n_char,'(i0)') dimensions
+        write(n_char,'(i0)') ncomp
         format_string = "("//trim(n_char)//"f12.6)"
         write(u,format_string) transpose(pca%evec)
         close(u)
 
         write(*,*) "Writing PCA data to "//trim(pca_file)//"..."
         open(newunit=u, file=trim(pca_file))
-        ! NOTE: dimensions for pca data are reversed from those of the diffusion map
-        do j = 1, n
-            ! TODO: calculate some other value and place here
-            !write(u,"(f12.6)", advance="no") val(j)
-            do i = 1, dimensions
+        do j = 1, trj%nframes
+            do i = 1, ncomp
                 write(u,"(f12.6)", advance="no") pca%x(i,j)
             end do
             write(u,*)
