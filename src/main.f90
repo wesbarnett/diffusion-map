@@ -31,7 +31,7 @@ contains
         ndim = size(indata,1)
         ndata = size(indata,2)
 
-        ! only appropriate for cartesian data. Real world use we would use a different metric here
+        ! RMS distance between simulation frames based on the locations of the solute
         allocate(get_distance(ndata,ndata))
 
         do i = 1, ndata-1
@@ -227,18 +227,6 @@ program main
 
     call config%destroy()
 
-! TODO: remove; calculating from cartesian coordinates
-    ! val is the original data's position on the swiss roll
-!   write(*,*) "Reading in data from "//trim(infile)//"..."
-!   open(newunit=u, file=trim(infile), status="old")
-!   read(u,*) n
-!   allocate(point(dimensions,n))
-!   allocate(val(n))
-!   do i = 1, n
-!       read(u,*) point(:,i), val(i)
-!   end do
-!   close(u) 
-
 ! FIXME: use index file
     call trj%read(xtcfile)
 !   call trj%read(xtcfile, ndxfile, ndxgroup)
@@ -254,6 +242,7 @@ program main
         if (get_bandwidth) then
 
             write(*,*) "Performing diffusion map bandwidth analysis..."
+
             ! Cycle through different values of the bandwidth. See Fig. S1 in https://www.pnas.org/cgi/doi/10.1073/pnas.1003293107
 
             allocate(logsumsim(logbandwidth_l:logbandwidth_u))
@@ -318,8 +307,6 @@ program main
             write(n_char,'(i0)') dimensions
             format_string = "("//trim(n_char)//"f12.6)"
             do i = 1, dimensions
-                ! TODO: calculate some other value and place here
-                !write(u,"(f12.6)", advance="no") val(i)
                 do j = 1, dimensions
                     write(u,"(f12.6)", advance="no") dm%map(i,j)
                 end do
