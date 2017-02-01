@@ -19,34 +19,6 @@ contains
 
     end subroutine
 
-    ! kept separate from diffusion_map module since distance metric is determined depending only the application
-    function get_distance(indata)
-
-        implicit none
-        real(8), allocatable :: get_distance(:,:)
-        real(8), allocatable, intent(in) :: indata(:,:)
-        real(8) :: s
-        integer :: ndata, ndim, i, j, k
-    
-        ndim = size(indata,1)
-        ndata = size(indata,2)
-
-        ! RMS distance between simulation frames based on the locations of the solute
-        allocate(get_distance(ndata,ndata))
-
-        do i = 1, ndata-1
-            do j = i+1, ndata
-                s = 0.0d0
-                do k = 1, ndim
-                    s = s + (indata(k,i)-indata(k,j))**2
-                end do
-                get_distance(i,j) = dsqrt(s)
-                get_distance(j,i) = get_distance(i,j)
-            end do
-        end do
-
-    end function get_distance
-
     function get_rmsd(trj)
 
         use gmxfort_trajectory
